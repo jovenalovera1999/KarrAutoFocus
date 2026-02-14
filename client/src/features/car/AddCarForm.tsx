@@ -1,4 +1,5 @@
 import ComponentCard from "@/components/common/ComponentCard";
+import Button from "@/components/ui/button/Button";
 import Input from "@/components/ui/form/Input";
 import Label from "@/components/ui/form/Label";
 import Select from "@/components/ui/form/Select";
@@ -6,7 +7,7 @@ import Select from "@/components/ui/form/Select";
 export default function AddCarForm() {
   return (
     <>
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 mb-4">
         <ComponentCard title="Car Details">
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2 md:col-span-1">
@@ -19,9 +20,9 @@ export default function AddCarForm() {
                 <Input type="text" name="year_model" />
               </div>
               <div className="mb-4">
-                <Label required>Brand</Label>
-                <Select name="brand">
-                  <option value="">Select Brand</option>
+                <Label required>Make</Label>
+                <Select name="make">
+                  <option value="">Select Make</option>
                 </Select>
               </div>
               <div className="mb-4">
@@ -122,6 +123,27 @@ export default function AddCarForm() {
             </div>
           </div>
         </ComponentCard>
+        <ComponentCard title="Previous Owner Information">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="col-span-2 md:col-span-1">
+              <div>
+                <Label>First Owner</Label>
+                <Input type="text" name="first_owner" />
+              </div>
+            </div>
+            <div className="col-span-2 md:col-span-1">
+              <div>
+                <Label>Address</Label>
+                <Input type="text" name="address" />
+              </div>
+            </div>
+          </div>
+        </ComponentCard>
+      </div>
+      <div className="flex items-center justify-center">
+        <Button type="submit" className="w-full">
+          Save Car
+        </Button>
       </div>
     </>
   );

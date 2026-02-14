@@ -16,60 +16,68 @@ import {
 } from "../icons/index";
 import CompanyLogo from "@/img/ui/CompanyLogo.png";
 
-type NavItem = {
-  name: string;
-  icon?: React.ReactNode;
-  path?: string;
-  subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
-};
-
-const navItems: NavItem[] = [
-  {
-    name: "Dashboard",
-    path: "#",
-  },
-  {
-    name: "Add Car",
-    path: "#",
-  },
-  {
-    name: "Office Expenses",
-    path: "#",
-  },
-
-  {
-    name: "Reports",
-    path: "#",
-  },
-  {
-    name: "Petty Cash",
-    path: "#",
-  },
-  {
-    name: "Deposits",
-    path: "#",
-  },
-  {
-    name: "Reserved Units",
-    path: "#",
-  },
-  {
-    name: "Sold Units",
-    path: "#",
-  },
-  {
-    name: "Manage Users",
-    path: "#",
-  },
-  {
-    name: "Admin Only",
-    path: "#",
-  },
-];
-
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const pathname = usePathname();
+
+  type NavItem = {
+    name: string;
+    icon?: React.ReactNode;
+    path?: string;
+    subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
+  };
+
+  const navItems: NavItem[] = [
+    {
+      name: "Dashboard",
+      path: "#",
+    },
+    {
+      name: "Add Car",
+      path: "/add_car",
+    },
+    {
+      name: "Office Expenses",
+      path: "#",
+    },
+
+    {
+      name: "Reports",
+      path: "#",
+    },
+    {
+      name: "Petty Cash",
+      path: "#",
+    },
+    {
+      name: "Deposits",
+      path: "#",
+    },
+    {
+      name: "Reserved Units",
+      path: "#",
+    },
+    {
+      name: "Sold Units",
+      path: "#",
+    },
+    {
+      name: "Manage Users",
+      path: "/manage/users",
+    },
+    {
+      name: "Admin Only",
+      path: "#",
+    },
+    {
+      name: "References",
+      subItems: [
+        { name: "Makes", path: "#" },
+        { name: "Transmissions", path: "#" },
+        { name: "Car Status", path: "#" },
+      ],
+    },
+  ];
 
   const renderMenuItems = (navItems: NavItem[]) => (
     <ul className="flex flex-col gap-4">
