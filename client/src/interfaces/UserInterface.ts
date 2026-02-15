@@ -10,5 +10,5 @@ export interface UserFieldsErrors {
   password?: string[];
   password_confirmation?: string[];
   branch_assigned?: string[];
-  branch?: string[];
+  role?: string[];
 }

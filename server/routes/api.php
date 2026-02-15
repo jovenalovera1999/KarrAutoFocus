@@ -9,5 +9,6 @@ use Illuminate\Support\Facades\Route;
 // })->middleware('auth:sanctum');
 
 Route::controller(UserController::class)->prefix('/user')->group(function() {
+    Route::get('/loadUserReferences', 'loadUserReferences');
     Route::post('/storeUser', 'storeUser');
 });
