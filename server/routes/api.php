@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\CarController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -14,4 +15,8 @@ Route::controller(UserController::class)->prefix('/user')->group(function() {
     Route::post('/storeUser', 'storeUser');
     Route::put('/updateUser/{user}', 'updateUser');
     Route::delete('/deleteUser/{user}', 'deleteUser');
+});
+
+Route::controller(CarController::class)->prefix('/car')->group(function() {
+    Route::get('/loadCarReferences', 'loadCarReferences');
 });

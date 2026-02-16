@@ -3,7 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\Branch;
+use App\Models\CarStatus;
+use App\Models\Make;
 use App\Models\Role;
+use App\Models\Transmission;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -43,5 +46,34 @@ class DatabaseSeeder extends Seeder
         ]);
 
         User::factory(100)->create();
+
+        Make::factory()->createMany([
+            ['make' => 'Chevrolet'],
+            ['make' => 'Ford'],
+            ['make' => 'Foton'],
+            ['make' => 'Honda'],
+            ['make' => 'Hyundai'],
+            ['make' => 'Isuzu'],
+            ['make' => 'Kia'],
+            ['make' => 'Mazda'],
+            ['make' => 'MG'],
+            ['make' => 'Mitsubishi'],
+            ['make' => 'Nissan'],
+            ['make' => 'Subaru'],
+            ['make' => 'Suzuki'],
+            ['make' => 'Toyota'],
+            ['make' => 'Volkswagen'],
+        ]);
+
+        Transmission::factory()->createMany([
+            ['transmission' => 'M/T'],
+            ['transmission' => 'A/T'],
+        ]);
+
+        CarStatus::factory()->createMany([
+            ['car_status' => 'Available'],
+            ['car_status' => 'Reserved'],
+            ['car_status' => 'Sold'],
+        ]);
     }
 }
