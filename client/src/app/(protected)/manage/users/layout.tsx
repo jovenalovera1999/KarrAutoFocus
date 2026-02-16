@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "Karr Auto Focus | Manage User",
 };
 
-export default function ManageUserLayout({
+export default function ManageUsersLayout({
   children,
 }: {
   children: ReactNode;

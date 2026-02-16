@@ -34,7 +34,7 @@ const AppSidebar: React.FC = () => {
     },
     {
       name: "Add Car",
-      path: "/add_car",
+      path: "/car/add",
     },
     {
       name: "Office Expenses",

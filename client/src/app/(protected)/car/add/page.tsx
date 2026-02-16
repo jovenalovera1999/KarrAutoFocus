@@ -1,6 +1,6 @@
 import AddCarForm from "@/features/car/AddCarForm";
 
-export default function AddCarPage() {
+export default function CarAddPage() {
   return (
     <>
       <AddCarForm />

@@ -1,4 +1,3 @@
-import Badge from "@/components/ui/badge/Badge";
 import Button from "@/components/ui/button/Button";
 import Input from "@/components/ui/form/Input";
 import Label from "@/components/ui/form/Label";
@@ -9,112 +8,121 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import Image from "next/image";
+import { useFormat } from "@/hooks/useFormat";
+import { UserColumns } from "@/interfaces/UserInterface";
+import UserService from "@/services/UserService";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { PencilIcon, TrashBinIcon } from "@/icons/index";
+import ButtonIcon from "@/components/ui/button/ButtonIcon";
+import Spinner from "@/components/ui/spinner/Spinner";
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface UsersTableProps {
   onCreateUser: () => void;
+  onEditUser: (selectedUser: UserColumns | null) => void;
+  onDeleteUser: (selectedUser: UserColumns | null) => void;
+  refreshUsers: boolean;
 }
 
-export default function UsersTable({ onCreateUser }: UsersTableProps) {
-  interface Order {
-    id: number;
-    user: {
-      image: string;
-      name: string;
-      role: string;
-    };
-    projectName: string;
-    team: {
-      images: string[];
-    };
-    status: string;
-    budget: string;
-  }
+export default function UsersTable({
+  onCreateUser,
+  onEditUser,
+  onDeleteUser,
+  refreshUsers,
+}: UsersTableProps) {
+  const { handleFullNameFormat, handleDateFormat } = useFormat();
 
-  // Define the table data using the interface
-  const tableData: Order[] = [
-    {
-      id: 1,
-      user: {
-        image: "/images/user/user-17.jpg",
-        name: "Lindsey Curtis",
-        role: "Web Designer",
-      },
-      projectName: "Agency Website",
-      team: {
-        images: [
-          "/images/user/user-22.jpg",
-          "/images/user/user-23.jpg",
-          "/images/user/user-24.jpg",
-        ],
-      },
-      budget: "3.9K",
-      status: "Active",
+  const [isUsersLoading, setIsUsersLoading] = useState(false);
+  const [isMoreUsersLoading, setIsMoreUsersLoading] = useState(false);
+  const [users, setUsers] = useState<UserColumns[]>([]);
+  const [lastPage, setLastPage] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
+
+  const debouncedSearch = useDebounce(search);
+
+  const tableRef = useRef<HTMLDivElement>(null);
+  const pageRef = useRef(1);
+
+  const handleLoadUsers = useCallback(
+    async (loadPage: number, searchValue: string) => {
+      try {
+        if (
+          (loadPage === 1 && isUsersLoading) ||
+          (loadPage > 1 && isMoreUsersLoading) ||
+          (lastPage !== null && loadPage > lastPage)
+        ) {
+          return;
+        }
+
+        loadPage === 1 ? setIsUsersLoading(true) : setIsMoreUsersLoading(true);
+
+        const { status, data } = await UserService.loadUsers(
+          loadPage,
+          searchValue,
+        );
+
+        if (status !== 200) {
+          console.error(
+            "Status error during load users at UsersTable.tsx: ",
+            status,
+          );
+          return;
+        }
+
+        setUsers((prev) =>
+          loadPage === 1 ? data.users : [...prev, ...data.users],
+        );
+        setLastPage(data.lastPage);
+      } catch (error: any) {
+        console.error(
+          "Server error during load users at UsersTable.tsx: ",
+          error,
+        );
+      } finally {
+        loadPage === 1
+          ? setIsUsersLoading(false)
+          : setIsMoreUsersLoading(false);
+      }
     },
-    {
-      id: 2,
-      user: {
-        image: "/images/user/user-18.jpg",
-        name: "Kaiya George",
-        role: "Project Manager",
-      },
-      projectName: "Technology",
-      team: {
-        images: ["/images/user/user-25.jpg", "/images/user/user-26.jpg"],
-      },
-      budget: "24.9K",
-      status: "Pending",
-    },
-    {
-      id: 3,
-      user: {
-        image: "/images/user/user-17.jpg",
-        name: "Zain Geidt",
-        role: "Content Writing",
-      },
-      projectName: "Blog Writing",
-      team: {
-        images: ["/images/user/user-27.jpg"],
-      },
-      budget: "12.7K",
-      status: "Active",
-    },
-    {
-      id: 4,
-      user: {
-        image: "/images/user/user-20.jpg",
-        name: "Abram Schleifer",
-        role: "Digital Marketer",
-      },
-      projectName: "Social Media",
-      team: {
-        images: [
-          "/images/user/user-28.jpg",
-          "/images/user/user-29.jpg",
-          "/images/user/user-30.jpg",
-        ],
-      },
-      budget: "2.8K",
-      status: "Cancel",
-    },
-    {
-      id: 5,
-      user: {
-        image: "/images/user/user-21.jpg",
-        name: "Carla George",
-        role: "Front-end Developer",
-      },
-      projectName: "Website",
-      team: {
-        images: [
-          "/images/user/user-31.jpg",
-          "/images/user/user-32.jpg",
-          "/images/user/user-33.jpg",
-        ],
-      },
-      budget: "4.5K",
-      status: "Active",
-    },
+    [isUsersLoading, isMoreUsersLoading, lastPage],
+  );
+
+  useEffect(() => {
+    pageRef.current = 1;
+    setLastPage(null);
+    setUsers([]);
+
+    handleLoadUsers(1, debouncedSearch);
+  }, [refreshUsers, debouncedSearch]);
+
+  const handleScroll = useCallback(() => {
+    if (
+      !tableRef.current ||
+      isUsersLoading ||
+      isMoreUsersLoading ||
+      (lastPage && pageRef.current >= lastPage)
+    ) {
+      return;
+    }
+
+    const { scrollTop, scrollHeight, clientHeight } = tableRef.current;
+
+    if (scrollTop + clientHeight >= scrollHeight - 50) {
+      const nextPage = pageRef.current + 1;
+      pageRef.current = nextPage;
+      handleLoadUsers(nextPage, debouncedSearch);
+    }
+  }, [isUsersLoading, isMoreUsersLoading, lastPage, handleLoadUsers]);
+
+  const headers = [
+    "No.",
+    "Employee's Name",
+    "Birth Date",
+    "Contact Number",
+    "Email",
+    "Branch Assigned",
+    "Role",
+    "Actions",
   ];
 
   return (
@@ -122,7 +130,13 @@ export default function UsersTable({ onCreateUser }: UsersTableProps) {
       <div className="mb-4 flex flex-col-reverse gap-4 md:flex-row md:items-end md:justify-between">
         <div className="w-full md:w-72">
           <Label htmlFor="search">Search</Label>
-          <Input type="text" name="search" />
+          <Input
+            type="text"
+            name="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            autoFocus
+          />
         </div>
         <Button
           type="button"
@@ -133,109 +147,117 @@ export default function UsersTable({ onCreateUser }: UsersTableProps) {
         </Button>
       </div>
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
-        <div className="w-full overflow-x-auto">
+        <div
+          ref={tableRef}
+          onScroll={handleScroll}
+          className="w-full max-h-[calc(100vh-20.5rem)] overflow-x-auto overflow-y-auto"
+        >
           <div className="w-full min-w-full">
             <Table>
               {/* Table Header */}
               <TableHeader className="border-b border-gray-100 dark:border-white/5">
                 <TableRow>
-                  <TableCell
-                    isHeader
-                    className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                  >
-                    User
-                  </TableCell>
-                  <TableCell
-                    isHeader
-                    className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                  >
-                    Project Name
-                  </TableCell>
-                  <TableCell
-                    isHeader
-                    className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                  >
-                    Team
-                  </TableCell>
-                  <TableCell
-                    isHeader
-                    className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                  >
-                    Status
-                  </TableCell>
-                  <TableCell
-                    isHeader
-                    className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                  >
-                    Budget
-                  </TableCell>
+                  {headers.map((header) => (
+                    <TableCell
+                      isHeader
+                      className="bg-white dark:bg-gray-900 sticky top-0 px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                      key={header}
+                    >
+                      {header}
+                    </TableCell>
+                  ))}
                 </TableRow>
               </TableHeader>
 
               {/* Table Body */}
               <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
-                {tableData.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="px-5 py-4 sm:px-6 text-start">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 overflow-hidden rounded-full">
-                          <Image
-                            width={40}
-                            height={40}
-                            src={order.user.image}
-                            alt={order.user.name}
-                          />
-                        </div>
-                        <div>
-                          <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                            {order.user.name}
-                          </span>
-                          <span className="block text-gray-500 text-theme-xs dark:text-gray-400">
-                            {order.user.role}
-                          </span>
-                        </div>
+                {isUsersLoading && users.length <= 0 && (
+                  <TableRow>
+                    <TableCell
+                      className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"
+                      colSpan={headers.length}
+                    >
+                      <div className="flex items-center justify-center">
+                        <Spinner size="md" />
                       </div>
                     </TableCell>
+                  </TableRow>
+                )}
+
+                {users.map((user, index) => (
+                  <TableRow
+                    className="hover:bg-gray-100 dark:hover:bg-gray-800"
+                    key={user.user_id}
+                  >
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                      {order.projectName}
+                      {index + 1}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
+                      {handleFullNameFormat(user)}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                      <div className="flex -space-x-2">
-                        {order.team.images.map((teamImage, index) => (
-                          <div
-                            key={index}
-                            className="w-6 h-6 overflow-hidden border-2 border-white rounded-full dark:border-gray-900"
-                          >
-                            <Image
-                              width={24}
-                              height={24}
-                              src={teamImage}
-                              alt={`Team member ${index + 1}`}
-                              className="w-full"
-                            />
-                          </div>
-                        ))}
+                      {handleDateFormat(user.birth_date)}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                      {user.contact_number}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                      {user.email}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                      {user.branch.branch}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                      {user.role.role}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                      <div className="flex gap-2">
+                        <ButtonIcon
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          className="hover:text-blue-600"
+                          onClick={() => onEditUser(user)}
+                        >
+                          <PencilIcon />
+                        </ButtonIcon>
+                        <ButtonIcon
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          className="hover:text-red-600"
+                          onClick={() => onDeleteUser(user)}
+                        >
+                          <TrashBinIcon />
+                        </ButtonIcon>
                       </div>
-                    </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                      <Badge
-                        size="sm"
-                        color={
-                          order.status === "Active"
-                            ? "success"
-                            : order.status === "Pending"
-                              ? "warning"
-                              : "error"
-                        }
-                      >
-                        {order.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                      {order.budget}
                     </TableCell>
                   </TableRow>
                 ))}
+
+                {isMoreUsersLoading && (
+                  <TableRow>
+                    <TableCell
+                      className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"
+                      colSpan={headers.length}
+                    >
+                      <div className="flex items-center justify-center">
+                        <Spinner size="md" />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+
+                {!isUsersLoading && users.length <= 0 && (
+                  <TableRow>
+                    <TableCell
+                      className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"
+                      colSpan={headers.length}
+                    >
+                      No Record Found
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </div>

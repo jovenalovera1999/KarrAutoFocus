@@ -1,4 +1,3 @@
-import ComponentCard from "@/components/common/ComponentCard";
 import Button from "@/components/ui/button/Button";
 import Form from "@/components/ui/form/Form";
 import Input from "@/components/ui/form/Input";
@@ -16,16 +15,13 @@ import { FormEvent, useCallback, useEffect, useState } from "react";
 interface CreateUserFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  //   onUserCreated: (
-  //     status: "success" | "warning" | "failed" | "others",
-  //     message: string,
-  //   ) => void;
+  refreshUsers: () => void;
 }
 
 export default function CreateUserFormModal({
   isOpen,
   onClose,
-  //   onUserCreated,
+  refreshUsers,
 }: CreateUserFormModalProps) {
   const { showAlert } = useAlert();
 
@@ -100,7 +96,7 @@ export default function CreateUserFormModal({
 
       const { status, data } = await UserService.storeUser(payload);
 
-      if (status !== 201) {
+      if (status !== 200) {
         console.error(
           "Status error during store user at CreateUserFormModal.tsx: ",
           status,
@@ -127,6 +123,8 @@ export default function CreateUserFormModal({
       setBranchAssigned("");
       setRole("");
       setFieldErrors({});
+
+      refreshUsers();
     } catch (error: any) {
       if (error.response && error.response.status !== 422) {
         console.error(
@@ -148,11 +146,13 @@ export default function CreateUserFormModal({
         onClose={onClose}
         className="max-w-150 p-5 lg:p-10"
       >
-        {isReferencesLoading ? (
+        {isReferencesLoading && (
           <div className="flex items-center justify-center">
             <Spinner size="xl" />
           </div>
-        ) : (
+        )}
+
+        {!isReferencesLoading && branches.length > 0 && roles.length > 0 && (
           <Form onSubmit={handleStoreUser}>
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div className="col-span-2 md:col-span-1">
@@ -311,7 +311,7 @@ export default function CreateUserFormModal({
               <Button type="submit" className="w-full" disabled={isStoring}>
                 {isStoring ? (
                   <>
-                    <div className="flex gap-1">
+                    <div className="flex gap-2">
                       <Spinner size="xs" />
                       Creating User...
                     </div>
