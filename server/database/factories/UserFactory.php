@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Branch;
+use App\Models\Role;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -24,11 +26,17 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'first_name' => fake()->firstName(),
+            'middle_name' => fake()->lastName(),
+            'last_name' => fake()->lastName(),
+            'suffix_name' => fake()->optional(.2)->randomElement(['Jr.', 'Sr.', 'I', "II", 'III', 'IV', 'V']),
+            'birth_date' => fake()->date(),
+            'contact_number' => fake()->phoneNumber(),
+            'email' => fake()->optional(.7)->safeEmail(),
+            'username' => fake()->userName(6, 12),
+            'password' => 'user1234',
+            'branch_id' => Branch::inRandomOrder()->first()->branch_id,
+            'role_id' => Role::inRandomOrder()->first()->role_id,
         ];
     }
 

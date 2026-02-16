@@ -11,6 +11,36 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
+    public function loadUsers(Request $request) {
+        $page = $request->input('page', 1);
+        $search = $request->input('search');
+
+        $users = User::with(['branch', 'role'])
+            ->orderBy('last_name', 'asc')
+            ->orderBy('first_name', 'asc')
+            ->orderBy('middle_name', 'asc')
+            ->orderBy('suffix_name', 'asc');
+
+        if(!empty($search)) {
+            $users->where(function($user) use ($search) {
+                $user->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('middle_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('suffix_name', 'like', "%{$search}%");
+            });
+        }
+
+        $users = $users->paginate(15, ['*'], 'page', $page);
+
+        if($users) {
+            return response()->json([
+                'users' => $users->items(),
+                'currentPage' => $users->currentPage(),
+                'lastPage' => $users->lastPage(),
+            ], 200);
+        }
+    }
+
     public function loadUserReferences() {
         $branches = Branch::orderBy('branch', 'asc')
             ->get();
@@ -59,7 +89,47 @@ class UserController extends Controller
         if($user) {
             return response()->json([
                 'message' => 'User Successfully Created',
-            ], 201);
+            ], 200);
+        }
+    }
+
+    public function updateUser(Request $request, User $user) {
+        $validatedData = $request->validate([
+            'first_name' => ['required', 'max:55'],
+            'middle_name' => ['nullable', 'max:55'],
+            'last_name' => ['required', 'max:55'],
+            'suffix_name' => ['nullable', 'max:55'],
+            'birth_date' => ['required', 'date'],
+            'contact_number' => ['required', 'numeric'],
+            'email' => ['nullable', 'max:55'],
+            'branch_assigned' => ['required', Rule::exists('tbl_branches', 'branch_id')],
+            'role' => ['required', Rule::exists('tbl_roles', 'role_id')],
+        ]);
+
+        $updatedUser = $user->update([
+            'first_name' => $validatedData['first_name'],
+            'middle_name' => $validatedData['middle_name'],
+            'last_name' => $validatedData['last_name'],
+            'suffix_name' => $validatedData['suffix_name'],
+            'birth_date' => $validatedData['birth_date'],
+            'contact_number' => $validatedData['contact_number'],
+            'email' => $validatedData['email'],
+            'branch_id' => $validatedData['branch_assigned'],
+            'role_id' => $validatedData['role'],
+        ]);
+
+        if($updatedUser) {
+            return response()->json([
+                'message' => 'User Successfully Updated',
+            ], 200);
+        }
+    }
+
+    public function deleteUser(User $user) {
+        if($user->delete($user)) {
+            return response()->json([
+                'message' => 'User Successfully Deleted',
+            ], 200);
         }
     }
 }

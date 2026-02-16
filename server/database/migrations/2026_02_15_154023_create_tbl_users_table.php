@@ -20,7 +20,7 @@ return new class extends Migration
             $table->date('birth_date');
             $table->string('contact_number', 55);
             $table->string('email', 55)->nullable();
-            $table->string('username', 12)->unique();
+            $table->string('username', 55)->unique();
             $table->string('password', 255);
             $table->unsignedBigInteger('role_id');
             $table->unsignedBigInteger('branch_id');

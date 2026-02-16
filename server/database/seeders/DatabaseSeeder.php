@@ -41,5 +41,7 @@ class DatabaseSeeder extends Seeder
             ['role' => 'Manager'],
             ['role' => 'Staff'],
         ]);
+
+        User::factory(100)->create();
     }
 }
