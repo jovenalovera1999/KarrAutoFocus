@@ -7,6 +7,7 @@ use App\Models\Branch;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
@@ -22,7 +23,7 @@ class UserController extends Controller
             ->orderBy('suffix_name', 'asc');
 
         if(!empty($search)) {
-            $users->where(function($user) use ($search) {
+            $users->where(function ($user) use ($search) {
                 $user->where('first_name', 'like', "%{$search}%")
                     ->orWhere('middle_name', 'like', "%{$search}%")
                     ->orWhere('last_name', 'like', "%{$search}%")
@@ -30,15 +31,13 @@ class UserController extends Controller
             });
         }
 
-        $users = $users->paginate(15, ['*'], 'page', $page);
+        $users = $users->paginate(25, ['*'], 'page', $page);
 
-        if($users) {
-            return response()->json([
-                'users' => $users->items(),
-                'currentPage' => $users->currentPage(),
-                'lastPage' => $users->lastPage(),
-            ], 200);
-        }
+        return response()->json([
+            'users' => $users->items(),
+            'currentPage' => $users->currentPage(),
+            'lastPage' => $users->lastPage(),
+        ], 200);
     }
 
     public function loadUserReferences() {
@@ -48,12 +47,10 @@ class UserController extends Controller
         $roles = Role::orderBy('role', 'asc')
             ->get();
 
-        if($branches && $roles) {
-            return response()->json([
-                'branches' => $branches,
-                'roles' => $roles,
-            ], 200);
-        }
+        return response()->json([
+            'branches' => $branches,
+            'roles' => $roles,
+        ], 200);
     }
 
     public function storeUser(Request $request) {
@@ -72,25 +69,23 @@ class UserController extends Controller
             'role' => ['required', Rule::exists('tbl_roles', 'role_id')],
         ]);
 
-        $user = User::create([
+        User::create([
             'first_name' => $validatedData['first_name'],
-            'middle_name' => $validatedData['middle_name'],
+            'middle_name' => $validatedData['middle_name'] ?? null,
             'last_name' => $validatedData['last_name'],
-            'suffix_name' => $validatedData['suffix_name'],
+            'suffix_name' => $validatedData['suffix_name'] ?? null,
             'birth_date' => $validatedData['birth_date'],
             'contact_number' => $validatedData['contact_number'],
-            'email' => $validatedData['email'],
+            'email' => $validatedData['email'] ?? null,
             'username' => $validatedData['username'],
-            'password' => $validatedData['password'],
+            'password' => Hash::make($validatedData['password']),
             'branch_id' => $validatedData['branch_assigned'],
             'role_id' => $validatedData['role'],
         ]);
 
-        if($user) {
-            return response()->json([
-                'message' => 'User Successfully Created',
-            ], 200);
-        }
+        return response()->json([
+            'message' => 'User Successfully Created',
+        ], 200);
     }
 
     public function updateUser(Request $request, User $user) {
@@ -101,35 +96,33 @@ class UserController extends Controller
             'suffix_name' => ['nullable', 'max:55'],
             'birth_date' => ['required', 'date'],
             'contact_number' => ['required', 'numeric'],
-            'email' => ['nullable', 'max:55'],
+            'email' => ['nullable', 'email', 'max:55'],
             'branch_assigned' => ['required', Rule::exists('tbl_branches', 'branch_id')],
             'role' => ['required', Rule::exists('tbl_roles', 'role_id')],
         ]);
 
-        $updatedUser = $user->update([
+        $user->update([
             'first_name' => $validatedData['first_name'],
-            'middle_name' => $validatedData['middle_name'],
+            'middle_name' => $validatedData['middle_name'] ?? null,
             'last_name' => $validatedData['last_name'],
-            'suffix_name' => $validatedData['suffix_name'],
+            'suffix_name' => $validatedData['suffix_name'] ?? null,
             'birth_date' => $validatedData['birth_date'],
             'contact_number' => $validatedData['contact_number'],
-            'email' => $validatedData['email'],
+            'email' => $validatedData['email'] ?? null,
             'branch_id' => $validatedData['branch_assigned'],
             'role_id' => $validatedData['role'],
         ]);
 
-        if($updatedUser) {
-            return response()->json([
-                'message' => 'User Successfully Updated',
-            ], 200);
-        }
+        return response()->json([
+            'message' => 'User Successfully Updated',
+        ], 200);
     }
 
     public function deleteUser(User $user) {
-        if($user->delete($user)) {
-            return response()->json([
-                'message' => 'User Successfully Deleted',
-            ], 200);
-        }
+        $user->delete();
+
+        return response()->json([
+            'message' => 'User Successfully Deleted',
+        ], 200);
     }
 }

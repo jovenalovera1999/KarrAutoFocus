@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('tbl_encumbereds', function (Blueprint $table) {
             $table->id('encumbered_id');
-            $table->string('encumbered', 55);
+            $table->string('encumbered', 255);
             $table->softDeletes();
             $table->timestamps();
         });
