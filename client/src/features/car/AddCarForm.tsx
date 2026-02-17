@@ -26,7 +26,7 @@ import {
 
 export default function AddCarForm() {
   const { showAlert } = useAlert();
-  const { handleCommaInNumbersFormat } = useFormat();
+  const { handleCommaInNumbersOnTypingFormat } = useFormat();
 
   const [isReferencesLoading, setIsReferencesLoading] = useState(true);
   const [makes, setMakes] = useState<MakeColumns[]>([]);
@@ -292,7 +292,7 @@ export default function AddCarForm() {
                         <Input
                           type="text"
                           name="price"
-                          value={handleCommaInNumbersFormat(price)}
+                          value={handleCommaInNumbersOnTypingFormat(price)}
                           onChange={handlePriceChange}
                           errors={fieldErrors.price}
                         />

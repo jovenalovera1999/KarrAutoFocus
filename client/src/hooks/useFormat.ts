@@ -21,7 +21,7 @@ export const useFormat = () => {
     }).format(parsedDate);
   };
 
-  const handleCommaInNumbersFormat = (value: string) => {
+  const handleCommaInNumbersOnTypingFormat = (value: string) => {
     if (!value) {
       return "";
     }
@@ -39,9 +39,17 @@ export const useFormat = () => {
     return formattedInteger;
   };
 
+  const handleNumberDecimalFormat = (number: string | number) => {
+    return new Intl.NumberFormat("en-PH", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(Number(number));
+  };
+
   return {
     handleFullNameFormat,
     handleDateFormat,
-    handleCommaInNumbersFormat,
+    handleCommaInNumbersOnTypingFormat,
+    handleNumberDecimalFormat,
   };
 };
