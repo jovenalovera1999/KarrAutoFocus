@@ -33,8 +33,12 @@ const AppSidebar: React.FC = () => {
       path: "#",
     },
     {
-      name: "Add Car",
-      path: "/car/add",
+      name: "Car",
+      subItems: [
+        { name: "Add Car", path: "/car/add" },
+        { name: "Reserved Units", path: "#" },
+        { name: "Sold Units", path: "#" },
+      ],
     },
     {
       name: "Office Expenses",
@@ -51,14 +55,6 @@ const AppSidebar: React.FC = () => {
     },
     {
       name: "Deposits",
-      path: "#",
-    },
-    {
-      name: "Reserved Units",
-      path: "#",
-    },
-    {
-      name: "Sold Units",
       path: "#",
     },
     {
@@ -213,14 +209,24 @@ const AppSidebar: React.FC = () => {
   const isActive = useCallback((path: string) => path === pathname, [pathname]);
 
   useEffect(() => {
-    // Check if the current path matches any submenu item
-    let submenuMatched = false;
+    let matchedIndex: number | null = null;
 
-    // If no submenu item matches, close the open submenu
-    if (!submenuMatched) {
+    navItems.forEach((nav, index) => {
+      if (nav.subItems) {
+        nav.subItems.forEach((subItem) => {
+          if (subItem.path === pathname) {
+            matchedIndex = index;
+          }
+        });
+      }
+    });
+
+    if (matchedIndex !== null) {
+      setOpenSubmenu({ index: matchedIndex });
+    } else {
       setOpenSubmenu(null);
     }
-  }, [pathname, isActive]);
+  }, [pathname]);
 
   useEffect(() => {
     // Set the height of the submenu items when the submenu is opened

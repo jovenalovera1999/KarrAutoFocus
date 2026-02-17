@@ -146,7 +146,7 @@ export default function CreateUserFormModal({
         onClose={onClose}
         className="max-w-150 p-5 lg:p-10"
       >
-        {isReferencesLoading && (
+        {isReferencesLoading && branches.length <= 0 && roles.length <= 0 && (
           <div className="flex items-center justify-center">
             <Spinner size="xl" />
           </div>

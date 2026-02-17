@@ -1,4 +1,5 @@
 import { UserColumns } from "@/interfaces/UserInterface";
+import { ChangeEvent, useState } from "react";
 
 export const useFormat = () => {
   const handleFullNameFormat = (user: UserColumns) => {
@@ -20,5 +21,27 @@ export const useFormat = () => {
     }).format(parsedDate);
   };
 
-  return { handleFullNameFormat, handleDateFormat };
+  const handleCommaInNumbersFormat = (value: string) => {
+    if (!value) {
+      return "";
+    }
+
+    const [integerPart, decimalPart] = value.split(".");
+
+    const formattedInteger = Number(
+      integerPart.replace(/,/g, ""),
+    ).toLocaleString("en-US");
+
+    if (decimalPart !== undefined) {
+      return `${formattedInteger}.${decimalPart}`;
+    }
+
+    return formattedInteger;
+  };
+
+  return {
+    handleFullNameFormat,
+    handleDateFormat,
+    handleCommaInNumbersFormat,
+  };
 };
