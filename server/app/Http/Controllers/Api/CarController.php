@@ -139,16 +139,58 @@ class CarController extends Controller
         ]);
 
         DB::transaction(function () use ($validatedData) {
+            $color = Color::withTrashed()
+                ->firstOrCreate([
+                    'color' => $validatedData['color']
+                ]);
 
-            $color = Color::firstOrCreate(['color' => $validatedData['color']]);
-            $motherFile = MotherFile::firstOrCreate(['mother_file' => $validatedData['mother_file']]);
-            $engineCc = EngineCc::firstOrCreate(['engine_cc' => $validatedData['engine_cc']]);
-            $encumbered = $validatedData['encumbered']
-                ? Encumbered::firstOrCreate(['encumbered' => $validatedData['encumbered']])
-                : null;
-            $transferStatus = $validatedData['transfer_status']
-                ? TransferStatus::firstOrCreate(['transfer_status' => $validatedData['transfer_status']])
-                : null;
+            if($color->trashed()) {
+                $color->restore();
+            }
+
+            $motherFile = MotherFile::withTrashed()
+                ->firstOrCreate([
+                    'mother_file' => $validatedData['mother_file']
+                ]);
+
+            if($motherFile->trashed()) {
+                $motherFile->restore();
+            }
+
+            $engineCc = EngineCc::withTrashed()
+                ->firstOrCreate([
+                    'engine_cc' => $validatedData['engine_cc']
+                ]);
+
+            if($engineCc->trashed()) {
+                $engineCc->restore();
+            }
+
+            $encumbered = null;
+
+            if(!empty($validatedData['encumbered'])){
+                $encumbered = Encumbered::withTrashed()
+                    ->firstOrCreate([
+                        'encumbered' => $validatedData['encumbered']
+                    ]);
+
+                if($encumbered->trashed()) {
+                    $encumbered->restore();
+                }
+            }
+
+            $transferStatus = null;
+
+            if(!empty($validatedData['transfer_status'])) {
+                $transferStatus = TransferStatus::withTrashed()
+                    ->firstOrCreate([
+                        'transfer_status' => $validatedData['transfer_status']
+                    ]);
+
+                if($transferStatus->trashed()) {
+                    $transferStatus->restore();
+                }
+            }
 
             Car::create([
                 'encode_date' => $validatedData['encode_date'],
