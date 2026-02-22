@@ -445,4 +445,12 @@ class CarController extends Controller
             'message' => 'Car Successfully Updated',
         ], 200);
     }
+
+    public function deleteCar(Car $car) {
+        $car->delete();
+
+        return response()->json([
+            'message' => 'Car Successfully Deleted',
+        ], 200);
+    }
 }

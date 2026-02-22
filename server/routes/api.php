@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\CarController;
+use App\Http\Controllers\Api\ExpenseController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -25,4 +26,10 @@ Route::controller(CarController::class)->prefix('/car')->group(function() {
     Route::get('/getCar/{car}', 'getCar');
     Route::post('/storeCar', 'storeCar');
     Route::put('/updateCar/{car}', 'updateCar');
+    Route::delete('/deleteCar/{car}', 'deleteCar');
+});
+
+Route::controller(ExpenseController::class)->prefix('/expense')->group(function() {
+    Route::get('/loadExpenses', 'loadExpenses');
+    Route::post('/storeExpense', 'storeExpense');
 });
