@@ -1,5 +1,6 @@
 "use client";
 
+import GoToTopButton from "@/components/common/GoToTopButton";
 import { useSidebar } from "@/context/SidebarContext";
 import AppHeader from "@/layout/AppHeader";
 import AppSidebar from "@/layout/AppSidebar";
@@ -30,6 +31,7 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
         {/* Page Content */}
         <div className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
           {children}
+          <GoToTopButton />
         </div>
       </div>
     </div>

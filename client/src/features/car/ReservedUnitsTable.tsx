@@ -16,13 +16,10 @@ import Spinner from "@/components/ui/spinner/Spinner";
 import { useDebounce } from "@/hooks/useDebounce";
 import { CarColumns } from "@/interfaces/CarInterface";
 import CarService from "@/services/CarService";
-import { useSidebar } from "@/context/SidebarContext";
 import Link from "next/link";
-import IconButton from "@/components/ui/button/IconButton";
 
 export default function ReservedUnitsTable() {
-  const { isExpanded, isHovered } = useSidebar();
-  const { handleDateFormat, handleNumberDecimalFormat } = useFormat();
+  const { handleNumberDecimalFormat } = useFormat();
 
   const [isReservedUnitsLoading, setIsReservedUnitsLoading] = useState(false);
   const [isMoreReservedUnitsLoading, setIsMoreReservedUnitsLoading] =
@@ -116,14 +113,9 @@ export default function ReservedUnitsTable() {
 
   const headers = [
     "No.",
-    "Encode Date",
     "Description",
     "Selling Price",
-    "Mother File",
     "Original OR/CR Received",
-    "Encumbered",
-    "Confirmation Received",
-    "1st Owner",
     "Actions",
   ];
 
@@ -145,7 +137,8 @@ export default function ReservedUnitsTable() {
         <div
           ref={tableRef}
           onScroll={handleScroll}
-          className={`relative sm:max-w-[calc(100vw-4rem)] ${isExpanded || isHovered ? "lg:max-w-[calc(100vw-24.5rem)]" : "lg:max-w-[calc(100vw-12rem)]"} max-h-[calc(100vh-18.5rem)] md:max-h-[calc(100vh-20.5rem)] overflow-x-auto overflow-y-auto`}
+          // className={`relative sm:max-w-[calc(100vw-4rem)] ${isExpanded || isHovered ? "lg:max-w-[calc(100vw-24.5rem)]" : "lg:max-w-[calc(100vw-12rem)]"} max-h-[calc(100vh-18.5rem)] md:max-h-[calc(100vh-20.5rem)] overflow-x-auto overflow-y-auto`}
+          className="w-full max-h-[calc(100vh-20.5rem)] overflow-x-auto overflow-y-auto"
         >
           <div className="w-full min-w-full">
             <Table>
@@ -187,11 +180,8 @@ export default function ReservedUnitsTable() {
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                       {index + 1}
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
-                      {handleDateFormat(unit.encode_date)}
-                    </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
-                      <p>{unit.year_model}</p>
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 min-w-96">
+                      <p className="text-sm">{unit.year_model}</p>
                       <p className="text-xs">Plate No.: {unit.plate_number}</p>
                       <p className="text-xs">
                         MV File Number: {unit.mv_file_number}
@@ -201,20 +191,7 @@ export default function ReservedUnitsTable() {
                       {handleNumberDecimalFormat(unit.price)}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
-                      {unit.mother_file.mother_file}
-                    </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                       {unit.original_or_cr_received ?? "-"}
-                    </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
-                      {unit.encumbered?.encumbered ?? "-"}
-                    </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
-                      {handleDateFormat(unit.confirmation_received ?? "") ||
-                        "-"}
-                    </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
-                      {unit.first_owner}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                       <div className="flex gap-2">

@@ -3,7 +3,7 @@ import api from "@/lib/api";
 const prefix = "/user";
 
 const UserService = {
-  loadUsers: async (page: number, search: string) => {
+  loadUsers: async (page: number, search?: string) => {
     const res = await api.get(`${prefix}/loadUsers`, {
       params: { page: page, ...(search ? { search: search } : {}) },
     });

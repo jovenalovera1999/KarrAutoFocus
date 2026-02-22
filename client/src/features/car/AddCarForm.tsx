@@ -2,6 +2,7 @@
 
 import ComponentCard from "@/components/common/ComponentCard";
 import Button from "@/components/ui/button/Button";
+import GoBackButton from "@/components/ui/button/GoBackButton";
 import Form from "@/components/ui/form/Form";
 import Input from "@/components/ui/form/Input";
 import Label from "@/components/ui/form/Label";
@@ -204,6 +205,7 @@ export default function AddCarForm() {
         transmissions.length > 0 &&
         carStatuss.length > 0 && (
           <>
+            <GoBackButton />
             <Form onSubmit={handleStoreCar}>
               <div className="flex flex-col gap-6 mb-4">
                 <ComponentCard title="Car Details">

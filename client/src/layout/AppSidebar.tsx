@@ -43,7 +43,7 @@ const AppSidebar: React.FC = () => {
     },
     {
       name: "Office Expenses",
-      path: "#",
+      path: "/expenses",
     },
 
     {

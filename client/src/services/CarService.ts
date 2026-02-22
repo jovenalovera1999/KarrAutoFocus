@@ -37,6 +37,10 @@ const CarService = {
     const res = await api.put(`${prefix}/updateCar/${carId}`, data);
     return res;
   },
+  deleteCar: async (carId: string | number) => {
+    const res = await api.delete(`${prefix}/deleteCar/${carId}`);
+    return res;
+  },
 };
 
 export default CarService;

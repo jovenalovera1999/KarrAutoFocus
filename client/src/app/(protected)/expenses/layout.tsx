@@ -2,9 +2,9 @@ import { Metadata } from "next";
 import { ReactNode } from "react";
 
 export const metadata: Metadata = {
-  title: "Karr Auto Focus | Add Car",
+  title: "Karr Auto Focus | Expenses",
 };
 
-export default function CarAddLayout({ children }: { children: ReactNode }) {
+export default function ExpensesLayout({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }

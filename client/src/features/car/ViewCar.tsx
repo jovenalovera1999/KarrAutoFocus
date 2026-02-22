@@ -253,7 +253,7 @@ export default function ViewCar() {
                       Original OR/CR Received
                     </p>
                     <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                      {handleDateFormat(originalOrCrReceived)}
+                      {handleDateFormat(originalOrCrReceived) || "-"}
                     </p>
                   </div>
                   <div className="mb-7">
@@ -261,7 +261,7 @@ export default function ViewCar() {
                       Encumbered
                     </p>
                     <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                      {encumbered}
+                      {encumbered || "-"}
                     </p>
                   </div>
                   <div className="mb-7">
@@ -269,7 +269,7 @@ export default function ViewCar() {
                       ROD Received
                     </p>
                     <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                      {handleDateFormat(rodReceived)}
+                      {handleDateFormat(rodReceived) || "-"}
                     </p>
                   </div>
                   <div className="mb-7">
@@ -277,7 +277,7 @@ export default function ViewCar() {
                       ROD Paid
                     </p>
                     <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                      {handleDateFormat(rodPaid)}
+                      {handleDateFormat(rodPaid) || "-"}
                     </p>
                   </div>
                   <div className="mb-3 md:mb-0">
@@ -285,7 +285,7 @@ export default function ViewCar() {
                       Last Registered
                     </p>
                     <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                      {handleDateFormat(lastRegistered)}
+                      {handleDateFormat(lastRegistered) || "-"}
                     </p>
                   </div>
                 </div>
@@ -295,7 +295,7 @@ export default function ViewCar() {
                       Confirmation Request
                     </p>
                     <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                      {confirmationRequest}
+                      {handleDateFormat(confirmationRequest) || "-"}
                     </p>
                   </div>
                   <div className="mb-7">
@@ -303,7 +303,7 @@ export default function ViewCar() {
                       Confirmation Received
                     </p>
                     <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                      {handleDateFormat(confirmationReceived)}
+                      {handleDateFormat(confirmationReceived) || "-"}
                     </p>
                   </div>
                   <div className="mb-7">
@@ -311,7 +311,7 @@ export default function ViewCar() {
                       HPG Clearance
                     </p>
                     <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                      {hpgClearance}
+                      {handleDateFormat(hpgClearance) || "-"}
                     </p>
                   </div>
                   <div className="mb-7">
@@ -319,7 +319,7 @@ export default function ViewCar() {
                       Transfer Status
                     </p>
                     <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                      {transferStatus}
+                      {transferStatus || "-"}
                     </p>
                   </div>
                 </div>
@@ -333,7 +333,7 @@ export default function ViewCar() {
                       First Owner
                     </p>
                     <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                      {firstOwner}
+                      {firstOwner || "-"}
                     </p>
                   </div>
                 </div>
@@ -343,7 +343,7 @@ export default function ViewCar() {
                       Address
                     </p>
                     <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                      {address}
+                      {address || "-"}
                     </p>
                   </div>
                 </div>
