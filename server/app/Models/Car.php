@@ -49,6 +49,10 @@ class Car extends Model
         return $this->belongsTo(Transmission::class, 'transmission_id', 'transmission_id')->withTrashed();
     }
 
+    public function color() {
+        return $this->belongsTo(Color::class, 'color_id', 'color_id')->withTrashed();
+    }
+
     public function mother_file() {
         return $this->belongsTo(MotherFile::class, 'mother_file_id', 'mother_file_id')->withTrashed();
     }

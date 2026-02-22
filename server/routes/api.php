@@ -19,6 +19,10 @@ Route::controller(UserController::class)->prefix('/user')->group(function() {
 
 Route::controller(CarController::class)->prefix('/car')->group(function() {
     Route::get('/loadAllUnits', 'loadAllUnits');
+    Route::get('/loadReservedUnits', 'loadReservedUnits');
+    Route::get('/loadSoldUnits', 'loadSoldUnits');
     Route::get('/loadCarReferences', 'loadCarReferences');
+    Route::get('/getCar/{car}', 'getCar');
     Route::post('/storeCar', 'storeCar');
+    Route::put('/updateCar/{car}', 'updateCar');
 });
