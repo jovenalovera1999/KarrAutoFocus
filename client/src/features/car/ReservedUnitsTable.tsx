@@ -1,4 +1,5 @@
-import Button from "@/components/ui/button/Button";
+"use client";
+
 import Input from "@/components/ui/form/Input";
 import Label from "@/components/ui/form/Label";
 import {
@@ -9,32 +10,24 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useFormat } from "@/hooks/useFormat";
-import { UserColumns } from "@/interfaces/UserInterface";
-import UserService from "@/services/UserService";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { PencilIcon, TrashBinIcon } from "@/icons/index";
+import { EyeIcon, PencilIcon, TrashBinIcon } from "@/icons/index";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { useDebounce } from "@/hooks/useDebounce";
+import { CarColumns } from "@/interfaces/CarInterface";
+import CarService from "@/services/CarService";
+import { useSidebar } from "@/context/SidebarContext";
+import Link from "next/link";
 import IconButton from "@/components/ui/button/IconButton";
 
-interface UsersTableProps {
-  onCreateUser: () => void;
-  onEditUser: (selectedUser: UserColumns | null) => void;
-  onDeleteUser: (selectedUser: UserColumns | null) => void;
-  refreshUsers: boolean;
-}
+export default function ReservedUnitsTable() {
+  const { isExpanded, isHovered } = useSidebar();
+  const { handleDateFormat, handleNumberDecimalFormat } = useFormat();
 
-export default function UsersTable({
-  onCreateUser,
-  onEditUser,
-  onDeleteUser,
-  refreshUsers,
-}: UsersTableProps) {
-  const { handleFullNameFormat, handleDateFormat } = useFormat();
-
-  const [isUsersLoading, setIsUsersLoading] = useState(false);
-  const [isMoreUsersLoading, setIsMoreUsersLoading] = useState(false);
-  const [users, setUsers] = useState<UserColumns[]>([]);
+  const [isReservedUnitsLoading, setIsReservedUnitsLoading] = useState(false);
+  const [isMoreReservedUnitsLoading, setIsMoreReservedUnitsLoading] =
+    useState(false);
+  const [reservedUnits, setReservedUnits] = useState<CarColumns[]>([]);
   const [lastPage, setLastPage] = useState<number | null>(null);
   const [search, setSearch] = useState("");
 
@@ -47,59 +40,61 @@ export default function UsersTable({
     async (loadPage: number, searchValue: string) => {
       try {
         if (
-          (loadPage === 1 && isUsersLoading) ||
-          (loadPage > 1 && isMoreUsersLoading) ||
+          (loadPage === 1 && isReservedUnitsLoading) ||
+          (loadPage > 1 && isMoreReservedUnitsLoading) ||
           (lastPage !== null && loadPage > lastPage)
         ) {
           return;
         }
 
-        loadPage === 1 ? setIsUsersLoading(true) : setIsMoreUsersLoading(true);
+        loadPage === 1
+          ? setIsReservedUnitsLoading(true)
+          : setIsMoreReservedUnitsLoading(true);
 
-        const { status, data } = await UserService.loadUsers(
+        const { status, data } = await CarService.loadReservedUnits(
           loadPage,
           searchValue,
         );
 
         if (status !== 200) {
           console.error(
-            "Status error during load users at UsersTable.tsx: ",
+            "Status error during load cars reserved units at ReservedUnitsTable.tsx: ",
             status,
           );
           return;
         }
 
-        setUsers((prev) =>
-          loadPage === 1 ? data.users : [...prev, ...data.users],
+        setReservedUnits((prev) =>
+          loadPage === 1 ? data.cars : [...prev, ...data.cars],
         );
         setLastPage(data.lastPage);
       } catch (error: any) {
         console.error(
-          "Server error during load users at UsersTable.tsx: ",
+          "Server error during load cars reserved units at ReservedUnitsTable.tsx: ",
           error,
         );
       } finally {
         loadPage === 1
-          ? setIsUsersLoading(false)
-          : setIsMoreUsersLoading(false);
+          ? setIsReservedUnitsLoading(false)
+          : setIsMoreReservedUnitsLoading(false);
       }
     },
-    [isUsersLoading, isMoreUsersLoading, lastPage],
+    [isReservedUnitsLoading, isMoreReservedUnitsLoading, lastPage],
   );
 
   useEffect(() => {
     pageRef.current = 1;
     setLastPage(null);
-    setUsers([]);
+    setReservedUnits([]);
 
     handleLoadUsers(1, debouncedSearch);
-  }, [refreshUsers, debouncedSearch]);
+  }, [debouncedSearch]);
 
   const handleScroll = useCallback(() => {
     if (
       !tableRef.current ||
-      isUsersLoading ||
-      isMoreUsersLoading ||
+      isReservedUnitsLoading ||
+      isMoreReservedUnitsLoading ||
       (lastPage && pageRef.current >= lastPage)
     ) {
       return;
@@ -112,14 +107,23 @@ export default function UsersTable({
       pageRef.current = nextPage;
       handleLoadUsers(nextPage, debouncedSearch);
     }
-  }, [isUsersLoading, isMoreUsersLoading, lastPage, handleLoadUsers]);
+  }, [
+    isReservedUnitsLoading,
+    isMoreReservedUnitsLoading,
+    lastPage,
+    handleLoadUsers,
+  ]);
 
   const headers = [
     "No.",
-    "Employee's Name",
-    "Birth Date",
-    "Branch Assigned",
-    "Role",
+    "Encode Date",
+    "Description",
+    "Selling Price",
+    "Mother File",
+    "Original OR/CR Received",
+    "Encumbered",
+    "Confirmation Received",
+    "1st Owner",
     "Actions",
   ];
 
@@ -136,19 +140,12 @@ export default function UsersTable({
             autoFocus
           />
         </div>
-        <Button
-          type="button"
-          className="w-full md:w-auto"
-          onClick={onCreateUser}
-        >
-          Create User
-        </Button>
       </div>
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
         <div
           ref={tableRef}
           onScroll={handleScroll}
-          className="w-full max-h-[calc(100vh-20.5rem)] overflow-x-auto overflow-y-auto"
+          className={`relative sm:max-w-[calc(100vw-4rem)] ${isExpanded || isHovered ? "lg:max-w-[calc(100vw-24.5rem)]" : "lg:max-w-[calc(100vw-12rem)]"} max-h-[calc(100vh-18.5rem)] md:max-h-[calc(100vh-20.5rem)] overflow-x-auto overflow-y-auto`}
         >
           <div className="w-full min-w-full">
             <Table>
@@ -158,7 +155,7 @@ export default function UsersTable({
                   {headers.map((header) => (
                     <TableCell
                       isHeader
-                      className="bg-brand-100 dark:bg-brand-900 sticky top-0 px-5 py-3 font-medium text-brand-500 dark:text-brand-400 text-start text-theme-xs"
+                      className="bg-brand-100 dark:bg-brand-900 sticky top-0 px-5 py-3 font-medium text-brand-500 dark:text-brand-400 text-start text-theme-xs whitespace-nowrap"
                       key={header}
                     >
                       {header}
@@ -169,7 +166,7 @@ export default function UsersTable({
 
               {/* Table Body */}
               <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
-                {isUsersLoading && users.length <= 0 && (
+                {isReservedUnitsLoading && reservedUnits.length <= 0 && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"
@@ -182,54 +179,69 @@ export default function UsersTable({
                   </TableRow>
                 )}
 
-                {users.map((user, index) => (
+                {reservedUnits.map((unit, index) => (
                   <TableRow
                     className="hover:bg-gray-100 dark:hover:bg-gray-800"
-                    key={user.user_id}
+                    key={unit.car_id}
                   >
-                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                       {index + 1}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
-                      <p>{handleFullNameFormat(user)}</p>
-                      <p className="text-xs">{user.contact_number}</p>
-                      <p className="text-xs">{user.email}</p>
+                      {handleDateFormat(unit.encode_date)}
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                      {handleDateFormat(user.birth_date)}
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
+                      <p>{unit.year_model}</p>
+                      <p className="text-xs">Plate No.: {unit.plate_number}</p>
+                      <p className="text-xs">
+                        MV File Number: {unit.mv_file_number}
+                      </p>
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                      {user.branch.branch}
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
+                      {handleNumberDecimalFormat(unit.price)}
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                      {user.role.role}
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
+                      {unit.mother_file.mother_file}
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
+                      {unit.original_or_cr_received ?? "-"}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
+                      {unit.encumbered?.encumbered ?? "-"}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
+                      {handleDateFormat(unit.confirmation_received ?? "") ||
+                        "-"}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
+                      {unit.first_owner}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                       <div className="flex gap-2">
-                        <IconButton
-                          type="button"
-                          size="icon"
-                          variant="ghost"
-                          className="hover:text-blue-600"
-                          onClick={() => onEditUser(user)}
+                        <Link
+                          href={`/car/view/${unit.car_id}`}
+                          className="text-gray-600 hover:text-blue-600"
+                        >
+                          <EyeIcon />
+                        </Link>
+                        <Link
+                          href={`/car/edit/${unit.car_id}`}
+                          className="text-gray-600 hover:text-yellow-500"
                         >
                           <PencilIcon />
-                        </IconButton>
-                        <IconButton
-                          type="button"
-                          size="icon"
-                          variant="ghost"
-                          className="hover:text-red-600"
-                          onClick={() => onDeleteUser(user)}
+                        </Link>
+                        <Link
+                          href={`/car/delete/${unit.car_id}`}
+                          className="text-gray-600 hover:text-red-600"
                         >
                           <TrashBinIcon />
-                        </IconButton>
+                        </Link>
                       </div>
                     </TableCell>
                   </TableRow>
                 ))}
 
-                {isMoreUsersLoading && (
+                {isMoreReservedUnitsLoading && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"
@@ -242,7 +254,7 @@ export default function UsersTable({
                   </TableRow>
                 )}
 
-                {!isUsersLoading && users.length <= 0 && (
+                {!isReservedUnitsLoading && reservedUnits.length <= 0 && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"

@@ -52,7 +52,7 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
 
       {alert && (
         <div
-          className={`fixed bottom-6 right-6 z-999999 w-full max-w-sm ${isClosing ? "animate-fade-out" : "animate-fade-in"}`}
+          className={`fixed bottom-6 right-0 md:right-6 z-999999 w-full max-w-sm ${isClosing ? "animate-fade-out" : "animate-fade-in"}`}
         >
           <Alert
             variant={alert.variant}

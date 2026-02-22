@@ -11,14 +11,18 @@ import {
 } from "@/components/ui/table";
 import { useFormat } from "@/hooks/useFormat";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { PencilIcon, TrashBinIcon } from "@/icons/index";
-import ButtonIcon from "@/components/ui/button/ButtonIcon";
+import { EyeIcon, PencilIcon, TrashBinIcon } from "@/icons/index";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { useDebounce } from "@/hooks/useDebounce";
 import { CarColumns } from "@/interfaces/CarInterface";
 import CarService from "@/services/CarService";
+import Badge from "@/components/ui/badge/Badge";
+import Link from "next/link";
+import { useSidebar } from "@/context/SidebarContext";
+import IconButton from "@/components/ui/button/IconButton";
 
 export default function AllUnitsTable() {
+  const { isExpanded, isHovered } = useSidebar();
   const { handleDateFormat, handleNumberDecimalFormat } = useFormat();
 
   const [isAllUnitsLoading, setIsAllUnitsLoading] = useState(false);
@@ -110,13 +114,12 @@ export default function AllUnitsTable() {
     "Encode Date",
     "Description",
     "Selling Price",
-    "Plate No.",
     "Mother File",
-    "MV File No.",
     "Original OR/CR Received",
     "Encumbered",
     "Confirmation Received",
     "1st Owner",
+    "Status",
     "Actions",
   ];
 
@@ -138,7 +141,7 @@ export default function AllUnitsTable() {
         <div
           ref={tableRef}
           onScroll={handleScroll}
-          className="relative max-w-[151vh]  max-h-[calc(100vh-13.5rem)] overflow-x-auto overflow-y-auto"
+          className={`relative sm:max-w-[calc(100vw-4rem)] ${isExpanded || isHovered ? "lg:max-w-[calc(100vw-24.5rem)]" : "lg:max-w-[calc(100vw-12rem)]"} max-h-[calc(100vh-18.5rem)] md:max-h-[calc(100vh-20.5rem)] overflow-x-auto overflow-y-auto`}
         >
           <div className="w-full min-w-full">
             <Table>
@@ -148,7 +151,7 @@ export default function AllUnitsTable() {
                   {headers.map((header) => (
                     <TableCell
                       isHeader
-                      className="bg-white dark:bg-gray-900 sticky top-0 px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400 whitespace-nowrap"
+                      className="bg-brand-100 dark:bg-brand-900 sticky top-0 px-5 py-3 font-medium text-brand-500 dark:text-brand-400 text-start text-theme-xs whitespace-nowrap"
                       key={header}
                     >
                       {header}
@@ -184,19 +187,17 @@ export default function AllUnitsTable() {
                       {handleDateFormat(unit.encode_date)}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
-                      {unit.year_model}
+                      <p>{unit.year_model}</p>
+                      <p className="text-xs">Plate No.: {unit.plate_number}</p>
+                      <p className="text-xs">
+                        MV File Number: {unit.mv_file_number}
+                      </p>
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                       {handleNumberDecimalFormat(unit.price)}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
-                      {unit.plate_number}
-                    </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                       {unit.mother_file.mother_file}
-                    </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
-                      {unit.mv_file_number}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                       {unit.original_or_cr_received ?? "-"}
@@ -212,23 +213,33 @@ export default function AllUnitsTable() {
                       {unit.first_owner}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
+                      <Badge
+                        size="sm"
+                        color={`${unit.car_status.car_status === "Available" ? "success" : unit.car_status.car_status === "Reserved" ? "warning" : "info"}`}
+                      >
+                        {unit.car_status.car_status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                       <div className="flex gap-2">
-                        <ButtonIcon
-                          type="button"
-                          size="icon"
-                          variant="ghost"
-                          className="hover:text-blue-600"
+                        <Link
+                          href={`/car/view/${unit.car_id}`}
+                          className="text-gray-600 hover:text-blue-600"
+                        >
+                          <EyeIcon />
+                        </Link>
+                        <Link
+                          href={`/car/edit/${unit.car_id}`}
+                          className="text-gray-600 hover:text-yellow-500"
                         >
                           <PencilIcon />
-                        </ButtonIcon>
-                        <ButtonIcon
-                          type="button"
-                          size="icon"
-                          variant="ghost"
-                          className="hover:text-red-600"
+                        </Link>
+                        <Link
+                          href={`/car/delete/${unit.car_id}`}
+                          className="text-gray-600 hover:text-red-600"
                         >
                           <TrashBinIcon />
-                        </ButtonIcon>
+                        </Link>
                       </div>
                     </TableCell>
                   </TableRow>

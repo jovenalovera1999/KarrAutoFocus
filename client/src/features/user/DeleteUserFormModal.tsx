@@ -57,6 +57,7 @@ export default function DeleteUserFormModal({
         message: data.message,
       });
 
+      onClose();
       refreshUsers();
     } catch (error: any) {
       console.error(

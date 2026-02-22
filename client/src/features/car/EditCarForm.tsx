@@ -2,6 +2,7 @@
 
 import ComponentCard from "@/components/common/ComponentCard";
 import Button from "@/components/ui/button/Button";
+import GoBackButton from "@/components/ui/button/GoBackButton";
 import Form from "@/components/ui/form/Form";
 import Input from "@/components/ui/form/Input";
 import Label from "@/components/ui/form/Label";
@@ -14,6 +15,7 @@ import { CarStatusColumns } from "@/interfaces/CarStatusInterface";
 import { MakeColumns } from "@/interfaces/MakeInterface";
 import { TransmissionColumns } from "@/interfaces/TransmissionInterface";
 import CarService from "@/services/CarService";
+import { useParams } from "next/navigation";
 import {
   ChangeEvent,
   FormEvent,
@@ -22,16 +24,20 @@ import {
   useState,
 } from "react";
 
-export default function AddCarForm() {
+export default function EditCarForm() {
+  const params = useParams();
+  const carId = params.car_id as string;
+
   const { showAlert } = useAlert();
   const { handleCommaInNumbersOnTypingFormat } = useFormat();
 
+  const [isGetting, setIsGetting] = useState(true);
   const [isReferencesLoading, setIsReferencesLoading] = useState(true);
   const [makes, setMakes] = useState<MakeColumns[]>([]);
   const [transmissions, setTransmissions] = useState<TransmissionColumns[]>([]);
   const [carStatuss, setCarStatuss] = useState<CarStatusColumns[]>([]);
 
-  const [isStoring, setIsStoring] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [encodeDate, setEncodeDate] = useState("");
   const [yearModel, setYearModel] = useState("");
   const [make, setMake] = useState("");
@@ -65,7 +71,7 @@ export default function AddCarForm() {
 
       if (status !== 200) {
         console.error(
-          "Status error during load car references at AddCarForm.tsx: ",
+          "Status error during load car references at EditCarForm.tsx: ",
           status,
         );
         return;
@@ -76,7 +82,7 @@ export default function AddCarForm() {
       setCarStatuss(data.carStatus);
     } catch (error: any) {
       console.error(
-        "Server error during load car references at AddCarForm.tsx: ",
+        "Server error during load car references at EditCarForm.tsx: ",
         error,
       );
     } finally {
@@ -88,10 +94,69 @@ export default function AddCarForm() {
     handleLoadCarReferences();
   }, []);
 
-  const handleStoreCar = async (e: FormEvent) => {
+  const handleGetCar = useCallback(
+    async (carId: string | number) => {
+      try {
+        const { status, data } = await CarService.getCar(carId);
+
+        if (status !== 200) {
+          console.error(
+            "Status error during get car at EditCarForm.tsx: ",
+            status,
+          );
+          return;
+        }
+
+        console.log(data);
+
+        setEncodeDate(data.car.encode_date);
+        setYearModel(data.car.year_model);
+        setMake(data.car.make.make_id);
+        setSeries(data.car.series);
+        setTransmission(data.car.transmission.transmission_id);
+        setColor(data.car.color.color);
+        setPrice(data.car.price);
+        setPlateNumber(data.car.plate_number);
+        setMotherFile(data.car.mother_file.mother_file);
+        setMvFileNumber(data.car.mv_file_number);
+        setEngineNumber(data.car.engine_number);
+        setChassisNumber(data.car.chassis_number);
+        setEngineCc(data.car.engine_cc.engine_cc);
+        setCarStatus(data.car.car_status.car_status_id);
+        setOriginalOrCrReceived(data.car.original_or_cr_received ?? "");
+        setEncumbered(data.car.encumbered.encumbered ?? "");
+        setRodReceived(data.car.rod_received ?? "");
+        setRodPaid(data.car.rod_paid ?? "");
+        setLastRegistered(data.car.last_registered ?? "");
+        setConfirmationRequest(data.car.confirmation_request ?? "");
+        setConfirmationReceived(data.car.confirmation_received ?? "");
+        setHpgClearance(data.car.hpg_clearance ?? "");
+        setTransferStatus(data.car.transfer_status.transfer_status);
+        setFirstOwner(data.car.first_owner);
+        setAddress(data.car.address);
+        setFieldErrors({});
+      } catch (error: any) {
+        console.error(
+          "Server error during get car at EditCarForm.tsx: ",
+          error,
+        );
+      } finally {
+        setIsGetting(false);
+      }
+    },
+    [carId],
+  );
+
+  useEffect(() => {
+    if (carId) {
+      handleGetCar(carId);
+    }
+  }, [carId]);
+
+  const handleUpdateCar = async (e: FormEvent) => {
     try {
       e.preventDefault();
-      setIsStoring(true);
+      setIsUpdating(true);
 
       const payload = {
         encode_date: encodeDate,
@@ -121,11 +186,11 @@ export default function AddCarForm() {
         address: address,
       };
 
-      const { status, data } = await CarService.storeCar(payload);
+      const { status, data } = await CarService.updateCar(carId, payload);
 
       if (status !== 200) {
         console.error(
-          "Status error during store car at AddCarForm.tsx: ",
+          "Status error during updating car at EditCarForm.tsx: ",
           status,
         );
         return;
@@ -133,40 +198,13 @@ export default function AddCarForm() {
 
       showAlert({
         variant: "success",
-        title: "Success",
+        title: "Update Success",
         message: data.message,
       });
-
-      setEncodeDate("");
-      setYearModel("");
-      setMake("");
-      setSeries("");
-      setTransmission("");
-      setColor("");
-      setPrice("");
-      setPlateNumber("");
-      setMotherFile("");
-      setMvFileNumber("");
-      setEngineNumber("");
-      setChassisNumber("");
-      setEngineCc("");
-      setCarStatus("");
-      setOriginalOrCrReceived("");
-      setEncumbered("");
-      setRodReceived("");
-      setRodPaid("");
-      setLastRegistered("");
-      setConfirmationRequest("");
-      setConfirmationReceived("");
-      setHpgClearance("");
-      setTransferStatus("");
-      setFirstOwner("");
-      setAddress("");
-      setFieldErrors({});
     } catch (error: any) {
       if (error.response && error.response.status !== 422) {
         console.error(
-          "Server error during store car at AddCarForm.tsx: ",
+          "Server error during updating car at EditCarForm.tsx: ",
           error,
         );
         return;
@@ -174,7 +212,7 @@ export default function AddCarForm() {
 
       setFieldErrors(error.response.data.errors);
     } finally {
-      setIsStoring(false);
+      setIsUpdating(false);
     }
   };
 
@@ -191,6 +229,8 @@ export default function AddCarForm() {
   return (
     <>
       {isReferencesLoading &&
+        isGetting &&
+        !carId &&
         makes.length <= 0 &&
         transmissions.length <= 0 &&
         carStatuss.length <= 0 && (
@@ -200,11 +240,14 @@ export default function AddCarForm() {
         )}
 
       {!isReferencesLoading &&
+        !isGetting &&
+        carId &&
         makes.length > 0 &&
         transmissions.length > 0 &&
         carStatuss.length > 0 && (
           <>
-            <Form onSubmit={handleStoreCar}>
+            <GoBackButton />
+            <Form onSubmit={handleUpdateCar}>
               <div className="flex flex-col gap-6 mb-4">
                 <ComponentCard title="Car Details">
                   <div className="grid grid-cols-2 gap-4">
@@ -290,7 +333,9 @@ export default function AddCarForm() {
                         <Input
                           type="text"
                           name="price"
-                          value={handleCommaInNumbersOnTypingFormat(price)}
+                          value={handleCommaInNumbersOnTypingFormat(
+                            price.toString(),
+                          )}
                           onChange={handlePriceChange}
                           errors={fieldErrors.price}
                         />
@@ -360,7 +405,7 @@ export default function AddCarForm() {
                       <div>
                         <Label required>Status</Label>
                         <Select
-                          name="status"
+                          name="car_status"
                           value={carStatus}
                           onChange={(e) => setCarStatus(e.target.value)}
                           errors={fieldErrors.status}
@@ -511,16 +556,16 @@ export default function AddCarForm() {
                 </ComponentCard>
               </div>
               <div className="flex items-center justify-center">
-                <Button type="submit" className="w-full" disabled={isStoring}>
-                  {isStoring ? (
+                <Button type="submit" className="w-full" disabled={isUpdating}>
+                  {isUpdating ? (
                     <>
                       <div className="flex gap-2">
                         <Spinner size="xs" />
-                        Adding Car...
+                        Updating Car...
                       </div>
                     </>
                   ) : (
-                    "Save Car"
+                    "Update Car"
                   )}
                 </Button>
               </div>

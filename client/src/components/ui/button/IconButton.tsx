@@ -1,6 +1,6 @@
 import React, { ReactNode } from "react";
 
-interface ButtonIconProps {
+interface IconPropsButton {
   children: ReactNode; // Button text or content
   type: "submit" | "button";
   size?: "sm" | "md" | "icon"; // Button size
@@ -12,7 +12,7 @@ interface ButtonIconProps {
   className?: string; // Disabled state
 }
 
-const ButtonIcon: React.FC<ButtonIconProps> = ({
+const IconButton: React.FC<IconPropsButton> = ({
   children,
   type,
   size = "md",
@@ -58,4 +58,4 @@ const ButtonIcon: React.FC<ButtonIconProps> = ({
   );
 };
 
-export default ButtonIcon;
+export default IconButton;

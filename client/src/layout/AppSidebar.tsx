@@ -36,9 +36,9 @@ const AppSidebar: React.FC = () => {
       name: "Car",
       subItems: [
         { name: "Add Car", path: "/car/add" },
-        { name: "All Units", path: "/car/all_units" },
-        { name: "Reserved Units", path: "#" },
-        { name: "Sold Units", path: "#" },
+        { name: "All Units", path: "/car/unit/all" },
+        { name: "Reserved Units", path: "/car/unit/reserved" },
+        { name: "Sold Units", path: "/car/unit/sold" },
       ],
     },
     {

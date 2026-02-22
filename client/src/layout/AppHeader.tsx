@@ -7,6 +7,7 @@ import { useSidebar } from "@/context/SidebarContext";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
+import CompanyLogo from "@/img/ui/CompanyLogo.png";
 
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
@@ -86,18 +87,18 @@ const AppHeader: React.FC = () => {
 
           <Link href="/" className="lg:hidden">
             <Image
-              width={154}
+              width={60}
               height={32}
               className="dark:hidden"
-              src="./images/logo/logo.svg"
-              alt="Logo"
+              src={CompanyLogo}
+              alt="Company Logo"
             />
             <Image
-              width={154}
+              width={60}
               height={32}
               className="hidden dark:block"
-              src="./images/logo/logo-dark.svg"
-              alt="Logo"
+              src={CompanyLogo}
+              alt="Company Logo"
             />
           </Link>
 
