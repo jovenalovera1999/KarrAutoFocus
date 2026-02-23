@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('series', 255);
             $table->unsignedBigInteger('transmission_id');
             $table->unsignedBigInteger('color_id');
-            $table->double('price');
+            $table->double('price')->default(0);
             $table->string('plate_number', 255);
             $table->unsignedBigInteger('mother_file_id');
             $table->string('mv_file_number', 255);
@@ -38,6 +38,7 @@ return new class extends Migration
             $table->unsignedBigInteger('transfer_status_id');
             $table->string('first_owner', 255)->nullable();
             $table->string('address', 255)->nullable();
+            $table->unsignedBigInteger('buyer_id')->nullable();
             $table->softDeletes();
             $table->timestamps();
 
@@ -86,6 +87,12 @@ return new class extends Migration
             $table->foreign('transfer_status_id')
                 ->references('transfer_status_id')
                 ->on('tbl_transfer_status')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreign('buyer_id')
+                ->references('buyer_id')
+                ->on('tbl_buyers')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
         });

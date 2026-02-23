@@ -39,6 +39,7 @@ class Car extends Model
         'transfer_status_id',
         'first_owner',
         'address',
+        'buyer_id',
     ];
 
     public function make() {
@@ -71,5 +72,13 @@ class Car extends Model
 
     public function transfer_status() {
         return $this->belongsTo(TransferStatus::class, 'transfer_status_id', 'transfer_status_id')->withTrashed();
+    }
+
+    public function buyer() {
+        return $this->belongsTo(Buyer::class, 'buyer_id', 'buyer_id')->withTrashed();
+    }
+
+    public function unit_expenses() {
+        return $this->hasMany(UnitExpense::class, 'car_id', 'car_id');
     }
 }

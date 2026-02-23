@@ -3,17 +3,17 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Expense;
+use App\Models\OfficeExpenses;
 use Illuminate\Http\Request;
 
-class ExpenseController extends Controller
+class OfficeExpenseController extends Controller
 {
-    public function loadExpenses(Request $request) {
+    public function loadOfficeExpenses(Request $request) {
         $page = $request->input('page', 1);
         $dateFrom = $request->input('date_from');
         $dateTo = $request->input('date_to');
 
-        $expenses = Expense::orderBy('created_at', 'desc');
+        $expenses = OfficeExpenses::orderBy('created_at', 'desc');
 
         if(!empty($dateFrom) && !empty($dateTo)) {
             $expenses->where(function ($query) use ($dateFrom, $dateTo) {
@@ -30,21 +30,21 @@ class ExpenseController extends Controller
         ], 200);
     }
 
-    public function storeExpense(Request $request) {
+    public function storeOfficeExpense(Request $request) {
         $validatedData = $request->validate([
             'incurrence_date' => ['required', 'date'],
             'amount' => ['required', 'numeric'],
             'description' => ['required', 'max:255'],
         ]);
 
-        Expense::create([
+        OfficeExpenses::create([
             'incurrence_date' => $validatedData['incurrence_date'],
             'amount' => $validatedData['amount'],
             'description' => $validatedData['description'],
         ]);
 
         return response()->json([
-            'message' => 'Expense Successfully Added',
+            'message' => 'Office Expense Successfully Added',
         ], 200);
     }
 }

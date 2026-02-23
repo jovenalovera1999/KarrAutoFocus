@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 
-class Expense extends Model
+class OfficeExpenses extends Model
 {
     use HasFactory, Notifiable, SoftDeletes;
 
-    protected $table = 'tbl_expenses';
-    protected $primaryKey = 'expense_id';
+    protected $table = 'tbl_office_expenses';
+    protected $primaryKey = 'office_expense_id';
     protected $fillable = [
         'incurrence_date',
         'amount',

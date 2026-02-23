@@ -11,11 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tbl_expenses', function (Blueprint $table) {
-            $table->id('expense_id');
-            $table->date('incurrence_date');
-            $table->double('amount');
-            $table->text('description', 255);
+        Schema::create('tbl_buyers', function (Blueprint $table) {
+            $table->id('buyer_id');
+            $table->string('buyer', 255);
             $table->softDeletes();
             $table->timestamps();
         });
@@ -27,7 +25,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::disableForeignKeyConstraints();
-        Schema::dropIfExists('tbl_expenses');
+        Schema::dropIfExists('tbl_buyers');
         Schema::enableForeignKeyConstraints();
     }
 };

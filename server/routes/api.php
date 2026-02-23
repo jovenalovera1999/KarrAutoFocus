@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Api\CarController;
 use App\Http\Controllers\Api\ExpenseController;
+use App\Http\Controllers\Api\OfficeExpenseController;
+use App\Http\Controllers\Api\UnitExpenseController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -20,6 +22,7 @@ Route::controller(UserController::class)->prefix('/user')->group(function() {
 
 Route::controller(CarController::class)->prefix('/car')->group(function() {
     Route::get('/loadAllUnits', 'loadAllUnits');
+    Route::get('/loadAvailableUnits', 'loadAvailableUnits');
     Route::get('/loadReservedUnits', 'loadReservedUnits');
     Route::get('/loadSoldUnits', 'loadSoldUnits');
     Route::get('/loadCarReferences', 'loadCarReferences');
@@ -29,7 +32,11 @@ Route::controller(CarController::class)->prefix('/car')->group(function() {
     Route::delete('/deleteCar/{car}', 'deleteCar');
 });
 
-Route::controller(ExpenseController::class)->prefix('/expense')->group(function() {
-    Route::get('/loadExpenses', 'loadExpenses');
-    Route::post('/storeExpense', 'storeExpense');
+Route::controller(OfficeExpenseController::class)->prefix('/expense')->group(function() {
+    Route::get('/loadOfficeExpenses', 'loadOfficeExpenses');
+    Route::post('/storeOfficeExpense', 'storeOfficeExpense');
+});
+
+Route::controller(UnitExpenseController::class)->prefix('/unit_expense')->group(function() {
+    Route::post('/storeUnitExpense', 'storeUnitExpense');
 });

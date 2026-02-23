@@ -31,6 +31,7 @@ class CarController extends Controller
             'car_status',
             'encumbered',
             'transfer_status',
+            'buyer',
         ])
         ->orderBy('created_at', 'desc')
         ->orderBy('encode_date', 'desc');
@@ -79,6 +80,90 @@ class CarController extends Controller
                 $query->orWhereHas('transfer_status', function ($q) use ($search) {
                     $q->where('transfer_status', 'like', "%{$search}%");
                 });
+
+                $query->orWhereHas('buyer', function ($q) use ($search) {
+                    $q->where('buyer', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        $cars = $cars->paginate(25, ['*'], 'page', $page);
+
+        return response()->json([
+            'cars' => $cars->items(),
+            'currentPage' => $cars->currentPage(),
+            'lastPage' => $cars->lastPage(),
+        ], 200);
+    }
+
+    public function loadAvailableUnits(Request $request) {
+        $page = $request->input('page', 1);
+        $search = $request->input('search');
+
+        $cars = Car::with([
+            'make',
+            'transmission',
+            'mother_file',
+            'engine_cc',
+            'car_status',
+            'encumbered',
+            'transfer_status',
+            'buyer',
+        ])
+        ->whereHas('car_status', function ($query) {
+            $query->where('car_status', 'Available');
+        })
+        ->orderBy('created_at', 'desc')
+        ->orderBy('encode_date', 'desc');
+
+        if (!empty($search)) {
+
+            $cars->where(function ($query) use ($search) {
+
+                // ==== tbl_cars columns ====
+                $query->where('year_model', 'like', "%{$search}%")
+                    ->orWhere('series', 'like', "%{$search}%")
+                    ->orWhere('plate_number', 'like', "%{$search}%")
+                    ->orWhere('mv_file_number', 'like', "%{$search}%")
+                    ->orWhere('engine_number', 'like', "%{$search}%")
+                    ->orWhere('chassis_number', 'like', "%{$search}%")
+                    ->orWhere('price', 'like', "%{$search}%")
+                    ->orWhere('first_owner', 'like', "%{$search}%")
+                    ->orWhere('address', 'like', "%{$search}%");
+
+                // ==== Related Tables ====
+
+                $query->orWhereHas('make', function ($q) use ($search) {
+                    $q->where('make', 'like', "%{$search}%");
+                });
+
+                $query->orWhereHas('transmission', function ($q) use ($search) {
+                    $q->where('transmission', 'like', "%{$search}%");
+                });
+
+                $query->orWhereHas('mother_file', function ($q) use ($search) {
+                    $q->where('mother_file', 'like', "%{$search}%");
+                });
+
+                $query->orWhereHas('engine_cc', function ($q) use ($search) {
+                    $q->where('engine_cc', 'like', "%{$search}%");
+                });
+
+                $query->orWhereHas('car_status', function ($q) use ($search) {
+                    $q->where('car_status', 'like', "%{$search}%");
+                });
+
+                $query->orWhereHas('encumbered', function ($q) use ($search) {
+                    $q->where('encumbered', 'like', "%{$search}%");
+                });
+
+                $query->orWhereHas('transfer_status', function ($q) use ($search) {
+                    $q->where('transfer_status', 'like', "%{$search}%");
+                });
+
+                $query->orWhereHas('buyer', function ($q) use ($search) {
+                    $q->where('buyer', 'like', "%{$search}%");
+                });
             });
         }
 
@@ -103,6 +188,7 @@ class CarController extends Controller
             'car_status',
             'encumbered',
             'transfer_status',
+            'buyer',
         ])
         ->whereHas('car_status', function ($query) {
             $query->where('car_status', 'Reserved');
@@ -154,6 +240,10 @@ class CarController extends Controller
                 $query->orWhereHas('transfer_status', function ($q) use ($search) {
                     $q->where('transfer_status', 'like', "%{$search}%");
                 });
+
+                $query->orWhereHas('buyer', function ($q) use ($search) {
+                    $q->where('buyer', 'like', "%{$search}%");
+                });
             });
         }
 
@@ -178,6 +268,7 @@ class CarController extends Controller
             'car_status',
             'encumbered',
             'transfer_status',
+            'buyer',
         ])
         ->whereHas('car_status', function ($query) {
             $query->where('car_status', 'Sold');
@@ -229,6 +320,10 @@ class CarController extends Controller
                 $query->orWhereHas('transfer_status', function ($q) use ($search) {
                     $q->where('transfer_status', 'like', "%{$search}%");
                 });
+
+                $query->orWhereHas('buyer', function ($q) use ($search) {
+                    $q->where('buyer', 'like', "%{$search}%");
+                });
             });
         }
 
@@ -257,7 +352,11 @@ class CarController extends Controller
         ], 200);
     }
 
-    public function getCar(Car $car) {
+    public function getCar(Request $request, Car $car) {
+        $page = $request->input('page', 1);
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+
         $car->load([
             'make',
             'color',
@@ -267,10 +366,25 @@ class CarController extends Controller
             'car_status',
             'encumbered',
             'transfer_status',
+            'buyer',
         ]);
+
+        $unitExpenses = $car->unit_expenses();
+
+        if(!empty($dateFrom) && !empty($dateTo)) {
+            $unitExpenses->where(function ($query) use ($dateFrom, $dateTo) {
+                $query->whereBetween('created_at', [$dateFrom, $dateTo]);
+            });
+        }
+
+        $unitExpenses = $unitExpenses->orderBy('created_at', 'desc')
+            ->paginate(25, ['*'], 'page', $page);
 
         return response()->json([
             'car' => $car,
+            'unitExpenses' => $unitExpenses->items(),
+            'currentPage' => $unitExpenses->currentPage(),
+            'lastPage' => $unitExpenses->lastPage(),
         ], 200);
     }
 
