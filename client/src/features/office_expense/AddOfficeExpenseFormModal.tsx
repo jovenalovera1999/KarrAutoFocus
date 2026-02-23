@@ -7,19 +7,19 @@ import { Modal } from "@/components/ui/modal";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { useAlert } from "@/context/AlertContext";
 import { useFormat } from "@/hooks/useFormat";
-import { ExpenseFieldsErrors } from "@/interfaces/ExpenseInterface";
-import ExpenseService from "@/services/ExpenseService";
+import { OfficeExpenseFieldsErrors } from "@/interfaces/OfficeExpenseInterface";
+import ExpenseService from "@/services/OfficeExpenseService";
 import { ChangeEvent, FormEvent, useState } from "react";
 
-interface AddExpenseFormModalProps {
+interface AddOfficeExpenseFormModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export default function AddExpenseFormModal({
+export default function AddOfficeExpenseFormModal({
   isOpen,
   onClose,
-}: AddExpenseFormModalProps) {
+}: AddOfficeExpenseFormModalProps) {
   const { showAlert } = useAlert();
   const { handleCommaInNumbersOnTypingFormat } = useFormat();
 
@@ -27,9 +27,9 @@ export default function AddExpenseFormModal({
   const [incurrenceDate, setIncurrenceDate] = useState("");
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
-  const [fieldErrors, setFieldErrors] = useState<ExpenseFieldsErrors>({});
+  const [fieldErrors, setFieldErrors] = useState<OfficeExpenseFieldsErrors>({});
 
-  const handleStoreExpense = async (e: FormEvent) => {
+  const handleStoreOfficeExpense = async (e: FormEvent) => {
     try {
       e.preventDefault();
       setIsStoring(true);
@@ -40,7 +40,7 @@ export default function AddExpenseFormModal({
         description: description,
       };
 
-      const { status, data } = await ExpenseService.storeExpense(payload);
+      const { status, data } = await ExpenseService.storeOfficeExpense(payload);
 
       if (status !== 200) {
         console.error(
@@ -88,7 +88,7 @@ export default function AddExpenseFormModal({
   return (
     <>
       <Modal isOpen={isOpen} onClose={onClose}>
-        <Form onSubmit={handleStoreExpense}>
+        <Form onSubmit={handleStoreOfficeExpense}>
           <div className="mb-4">
             <Label required>Incurrence Date</Label>
             <Input
@@ -125,11 +125,11 @@ export default function AddExpenseFormModal({
                 <>
                   <div className="flex gap-2">
                     <Spinner size="xs" />
-                    Saving Expense...
+                    Saving Office Expense...
                   </div>
                 </>
               ) : (
-                "Save Expense"
+                "Save Office Expense"
               )}
             </Button>
           </div>

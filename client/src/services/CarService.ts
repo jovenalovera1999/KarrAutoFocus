@@ -3,19 +3,25 @@ import api from "@/lib/api";
 const prefix = "/car";
 
 const CarService = {
-  loadAllUnits: async (page: number, search: string) => {
+  loadAllUnits: async (page: number, search?: string) => {
     const res = await api.get(`${prefix}/loadAllUnits`, {
       params: { page: page, ...(search ? { search: search } : {}) },
     });
     return res;
   },
-  loadReservedUnits: async (page: number, search: string) => {
+  loadAvailableUnits: async (page: number, search?: string) => {
+    const res = await api.get(`${prefix}/loadAvailableUnits`, {
+      params: { page: page, ...(search ? { search: search } : {}) },
+    });
+    return res;
+  },
+  loadReservedUnits: async (page: number, search?: string) => {
     const res = await api.get(`${prefix}/loadReservedUnits`, {
       params: { page: page, ...(search ? { search: search } : {}) },
     });
     return res;
   },
-  loadSoldUnits: async (page: number, search: string) => {
+  loadSoldUnits: async (page: number, search?: string) => {
     const res = await api.get(`${prefix}/loadSoldUnits`, {
       params: { page: page, ...(search ? { search: search } : {}) },
     });
@@ -25,8 +31,16 @@ const CarService = {
     const res = await api.get(`${prefix}/loadCarReferences`);
     return res;
   },
-  getCar: async (carId: string | number) => {
-    const res = await api.get(`${prefix}/getCar/${carId}`);
+  getCar: async (
+    carId: string | number,
+    page: number,
+    dateFrom?: string,
+    dateTo?: string,
+  ) => {
+    const res = await api.get(`${prefix}/getCar/${carId}`, {
+      params: { page: page },
+      ...(dateFrom && dateTo ? { date_from: dateFrom, date_to: dateTo } : {}),
+    });
     return res;
   },
   storeCar: async (data: any) => {

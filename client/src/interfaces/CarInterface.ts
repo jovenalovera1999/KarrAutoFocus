@@ -1,3 +1,4 @@
+import { BuyerColumns } from "./BuyerInterface";
 import { CarStatusColumns } from "./CarStatusInterface";
 import { ColorColumns } from "./ColorInterface";
 import { EncumberedColumns } from "./EncumberedInterface";
@@ -34,6 +35,7 @@ export interface CarColumns {
   transfer_status: TransferStatusColumns;
   first_owner: string;
   address: string;
+  buyer?: BuyerColumns;
   created_at: string;
   updated_at: string;
 }

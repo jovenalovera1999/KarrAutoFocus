@@ -1,4 +1,4 @@
-export interface ExpenseColumns {
+export interface OfficeExpenseColumns {
   expense_id: number;
   incurrence_date: string;
   amount: string;
@@ -7,7 +7,7 @@ export interface ExpenseColumns {
   updated_at: string;
 }
 
-export interface ExpenseFieldsErrors {
+export interface OfficeExpenseFieldsErrors {
   incurrence_date?: string[];
   amount?: string[];
   description?: string[];

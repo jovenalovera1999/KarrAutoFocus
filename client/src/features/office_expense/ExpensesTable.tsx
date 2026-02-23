@@ -14,23 +14,26 @@ import { PencilIcon, TrashBinIcon } from "@/icons/index";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { useDebounce } from "@/hooks/useDebounce";
 import IconButton from "@/components/ui/button/IconButton";
-import { ExpenseColumns } from "@/interfaces/ExpenseInterface";
-import ExpenseService from "@/services/ExpenseService";
+import ExpenseService from "@/services/OfficeExpenseService";
+import { OfficeExpenseColumns } from "@/interfaces/OfficeExpenseInterface";
 
-interface ExpensesTableProps {
+interface OfficeExpensesTableProps {
   onAddExpense: () => void;
   refreshExpenses: boolean;
 }
 
-export default function ExpensesTable({
+export default function OfficeExpensesTable({
   onAddExpense,
   refreshExpenses,
-}: ExpensesTableProps) {
+}: OfficeExpensesTableProps) {
   const { handleNumberDecimalFormat, handleDateFormat } = useFormat();
 
-  const [isExpensesLoading, setIsExpensesLoading] = useState(false);
-  const [isMoreExpensesLoading, setIsMoreExpensesLoading] = useState(false);
-  const [expenses, setExpenses] = useState<ExpenseColumns[]>([]);
+  const [isOfficeExpensesLoading, setIsOfficeExpensesLoading] = useState(false);
+  const [isMoreOfficeExpensesLoading, setIsMoreOfficeExpensesLoading] =
+    useState(false);
+  const [officeExpenses, setOfficeExpenses] = useState<OfficeExpenseColumns[]>(
+    [],
+  );
   const [lastPage, setLastPage] = useState<number | null>(null);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -41,22 +44,22 @@ export default function ExpensesTable({
   const tableRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef(1);
 
-  const handleLoadExpenses = useCallback(
+  const handleLoadOfficeExpenses = useCallback(
     async (loadPage: number, dateFromValue: string, dateToValue: string) => {
       try {
         if (
-          (loadPage === 1 && isExpensesLoading) ||
-          (loadPage > 1 && isMoreExpensesLoading) ||
+          (loadPage === 1 && isOfficeExpensesLoading) ||
+          (loadPage > 1 && isMoreOfficeExpensesLoading) ||
           (lastPage !== null && loadPage > lastPage)
         ) {
           return;
         }
 
         loadPage === 1
-          ? setIsExpensesLoading(true)
-          : setIsMoreExpensesLoading(true);
+          ? setIsOfficeExpensesLoading(true)
+          : setIsMoreOfficeExpensesLoading(true);
 
-        const { status, data } = await ExpenseService.loadExpenses(
+        const { status, data } = await ExpenseService.loadOfficeExpenses(
           loadPage,
           dateFromValue,
           dateToValue,
@@ -70,7 +73,7 @@ export default function ExpensesTable({
           return;
         }
 
-        setExpenses((prev) =>
+        setOfficeExpenses((prev) =>
           loadPage === 1 ? data.expenses : [...prev, ...data.expenses],
         );
         setLastPage(data.lastPage);
@@ -81,26 +84,26 @@ export default function ExpensesTable({
         );
       } finally {
         loadPage === 1
-          ? setIsExpensesLoading(false)
-          : setIsMoreExpensesLoading(false);
+          ? setIsOfficeExpensesLoading(false)
+          : setIsMoreOfficeExpensesLoading(false);
       }
     },
-    [isExpensesLoading, isMoreExpensesLoading, lastPage],
+    [isOfficeExpensesLoading, isMoreOfficeExpensesLoading, lastPage],
   );
 
   useEffect(() => {
     pageRef.current = 1;
     setLastPage(null);
-    setExpenses([]);
+    setOfficeExpenses([]);
 
-    handleLoadExpenses(1, debouncedDateFrom, debouncedDateTo);
+    handleLoadOfficeExpenses(1, debouncedDateFrom, debouncedDateTo);
   }, [refreshExpenses, debouncedDateFrom, debouncedDateTo]);
 
   const handleScroll = useCallback(() => {
     if (
       !tableRef.current ||
-      isExpensesLoading ||
-      isMoreExpensesLoading ||
+      isOfficeExpensesLoading ||
+      isMoreOfficeExpensesLoading ||
       (lastPage && pageRef.current >= lastPage)
     ) {
       return;
@@ -111,15 +114,21 @@ export default function ExpensesTable({
     if (scrollTop + clientHeight >= scrollHeight - 50) {
       const nextPage = pageRef.current + 1;
       pageRef.current = nextPage;
-      handleLoadExpenses(nextPage, debouncedDateFrom, debouncedDateTo);
+      handleLoadOfficeExpenses(nextPage, debouncedDateFrom, debouncedDateTo);
     }
-  }, [isExpensesLoading, isMoreExpensesLoading, lastPage, handleLoadExpenses]);
+  }, [
+    isOfficeExpensesLoading,
+    isMoreOfficeExpensesLoading,
+    lastPage,
+    handleLoadOfficeExpenses,
+  ]);
 
   const headers = [
     "No.",
     "Incurrence Date",
     "Amount",
     "Description",
+    "Date Added",
     "Actions",
   ];
 
@@ -181,7 +190,7 @@ export default function ExpensesTable({
 
               {/* Table Body */}
               <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
-                {isExpensesLoading && expenses.length <= 0 && (
+                {isOfficeExpensesLoading && officeExpenses.length <= 0 && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"
@@ -194,22 +203,25 @@ export default function ExpensesTable({
                   </TableRow>
                 )}
 
-                {expenses.map((expense, index) => (
+                {officeExpenses.map((officeExpense, index) => (
                   <TableRow
                     className="hover:bg-gray-100 dark:hover:bg-gray-800"
-                    key={expense.expense_id}
+                    key={officeExpense.expense_id}
                   >
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                       {index + 1}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                      {handleDateFormat(expense.incurrence_date)}
+                      {handleDateFormat(officeExpense.incurrence_date)}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                      {handleNumberDecimalFormat(expense.amount)}
+                      {handleNumberDecimalFormat(officeExpense.amount)}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                      {expense.description}
+                      {officeExpense.description}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                      {handleDateFormat(officeExpense.created_at)}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                       <div className="flex gap-2">
@@ -236,7 +248,7 @@ export default function ExpensesTable({
                   </TableRow>
                 ))}
 
-                {isMoreExpensesLoading && (
+                {isMoreOfficeExpensesLoading && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"
@@ -249,7 +261,7 @@ export default function ExpensesTable({
                   </TableRow>
                 )}
 
-                {!isExpensesLoading && expenses.length <= 0 && (
+                {!isOfficeExpensesLoading && officeExpenses.length <= 0 && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"
