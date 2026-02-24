@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { useFormat } from "@/hooks/useFormat";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { EyeIcon, PencilIcon, TrashBinIcon } from "@/icons/index";
+import { EyeIcon, FileIcon, PencilIcon, TrashBinIcon } from "@/icons/index";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { useDebounce } from "@/hooks/useDebounce";
 import { CarColumns } from "@/interfaces/CarInterface";
@@ -19,7 +19,7 @@ import CarService from "@/services/CarService";
 import Link from "next/link";
 
 export default function SoldUnitsTable() {
-  const { handleNumberDecimalFormat } = useFormat();
+  const { handleNumberDecimalFormat, handleDateFormat } = useFormat();
 
   const [isSoldUnitsLoading, setIsSoldUnitsLoading] = useState(false);
   const [isMoreSoldUnitsLoading, setIsMoreSoldUnitsLoading] = useState(false);
@@ -185,25 +185,26 @@ export default function SoldUnitsTable() {
                       {handleNumberDecimalFormat(unit.price)}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
-                      {unit.original_or_cr_received ?? "-"}
+                      {handleDateFormat(unit.original_or_cr_received || "-") ||
+                        "-"}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                       <div className="flex gap-2">
                         <Link
                           href={`/car/view/${unit.car_id}`}
-                          className="text-gray-600 hover:text-blue-600"
+                          className="text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400"
                         >
-                          <EyeIcon />
+                          <FileIcon />
                         </Link>
                         <Link
                           href={`/car/edit/${unit.car_id}`}
-                          className="text-gray-600 hover:text-yellow-500"
+                          className="text-gray-500 dark:text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400"
                         >
                           <PencilIcon />
                         </Link>
                         <Link
                           href={`/car/delete/${unit.car_id}`}
-                          className="text-gray-600 hover:text-red-600"
+                          className="text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400"
                         >
                           <TrashBinIcon />
                         </Link>

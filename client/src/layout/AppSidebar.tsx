@@ -64,10 +64,6 @@ const AppSidebar: React.FC = () => {
       path: "/manage/users",
     },
     {
-      name: "Admin Only",
-      path: "#",
-    },
-    {
       name: "References",
       subItems: [
         { name: "Makes", path: "#" },

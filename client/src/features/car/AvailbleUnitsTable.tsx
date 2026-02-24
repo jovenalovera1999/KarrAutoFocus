@@ -19,7 +19,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export default function AvaiableUnitsTable() {
-  const { handleNumberDecimalFormat } = useFormat();
+  const { handleNumberDecimalFormat, handleDateFormat } = useFormat();
 
   const [isAvailableUnitsLoading, setIsAvailableUnitsLoading] = useState(false);
   const [isMoreAvailableUnitsLoading, setIsMoreAvailableUnitsLoading] =
@@ -190,25 +190,26 @@ export default function AvaiableUnitsTable() {
                       {handleNumberDecimalFormat(unit.price)}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
-                      {unit.original_or_cr_received ?? "-"}
+                      {handleDateFormat(unit.original_or_cr_received || "-") ||
+                        "-"}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                       <div className="flex gap-2">
                         <Link
                           href={`/car/view/${unit.car_id}`}
-                          className="text-gray-600 hover:text-blue-600"
+                          className="text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400"
                         >
                           <FileIcon />
                         </Link>
                         <Link
                           href={`/car/edit/${unit.car_id}`}
-                          className="text-gray-600 hover:text-yellow-500"
+                          className="text-gray-500 dark:text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400"
                         >
                           <PencilIcon />
                         </Link>
                         <Link
                           href={`/car/delete/${unit.car_id}`}
-                          className="text-gray-600 hover:text-red-600"
+                          className="text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400"
                         >
                           <TrashBinIcon />
                         </Link>
