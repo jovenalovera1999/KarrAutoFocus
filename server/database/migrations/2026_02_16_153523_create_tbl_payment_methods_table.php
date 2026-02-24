@@ -11,16 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tbl_payment_details', function (Blueprint $table) {
-            $table->id('payment_detail_id');
-            $table->unsignedBigInteger('buyer_id');
+        Schema::create('tbl_payment_methods', function (Blueprint $table) {
+            $table->id('payment_method_id');
+            $table->string('payment_method', 55);
+            $table->softDeletes();
             $table->timestamps();
-
-            $table->foreign('buyer_id')
-                ->references('buyer_id')
-                ->on('tbl_buyers')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
         });
     }
 
@@ -30,7 +25,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::disableForeignKeyConstraints();
-        Schema::dropIfExists('tbl_payment_details');
+        Schema::dropIfExists('tbl_payment_methods');
         Schema::enableForeignKeyConstraints();
     }
 };

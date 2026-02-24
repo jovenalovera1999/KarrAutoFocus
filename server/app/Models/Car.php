@@ -81,4 +81,8 @@ class Car extends Model
     public function unit_expenses() {
         return $this->hasMany(UnitExpense::class, 'car_id', 'car_id');
     }
+
+    public function payment_details() {
+        return $this->hasMany(PaymentDetail::class, 'car_id', 'car_id');
+    }
 }

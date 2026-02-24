@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\BuyerController;
 use App\Http\Controllers\Api\CarController;
 use App\Http\Controllers\Api\ExpenseController;
 use App\Http\Controllers\Api\OfficeExpenseController;
@@ -39,4 +40,8 @@ Route::controller(OfficeExpenseController::class)->prefix('/expense')->group(fun
 
 Route::controller(UnitExpenseController::class)->prefix('/unit_expense')->group(function() {
     Route::post('/storeUnitExpense', 'storeUnitExpense');
+});
+
+Route::controller(BuyerController::class)->prefix('/buyer')->group(function() {
+    Route::post('/storeBuyer', 'storeBuyer');
 });
