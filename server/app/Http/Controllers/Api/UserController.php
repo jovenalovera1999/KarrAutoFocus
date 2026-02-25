@@ -34,7 +34,7 @@ class UserController extends Controller
         $users = $users->paginate(25, ['*'], 'page', $page);
 
         return response()->json([
-            'users' => $users->items(),
+            'data' => $users->items(),
             'currentPage' => $users->currentPage(),
             'lastPage' => $users->lastPage(),
         ], 200);

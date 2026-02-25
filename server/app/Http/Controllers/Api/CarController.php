@@ -90,7 +90,7 @@ class CarController extends Controller
         $cars = $cars->paginate(25, ['*'], 'page', $page);
 
         return response()->json([
-            'cars' => $cars->items(),
+            'data' => $cars->items(),
             'currentPage' => $cars->currentPage(),
             'lastPage' => $cars->lastPage(),
         ], 200);
@@ -170,7 +170,7 @@ class CarController extends Controller
         $cars = $cars->paginate(25, ['*'], 'page', $page);
 
         return response()->json([
-            'cars' => $cars->items(),
+            'data' => $cars->items(),
             'currentPage' => $cars->currentPage(),
             'lastPage' => $cars->lastPage(),
         ], 200);
@@ -250,7 +250,7 @@ class CarController extends Controller
         $cars = $cars->paginate(25, ['*'], 'page', $page);
 
         return response()->json([
-            'cars' => $cars->items(),
+            'data' => $cars->items(),
             'currentPage' => $cars->currentPage(),
             'lastPage' => $cars->lastPage(),
         ], 200);
@@ -330,7 +330,7 @@ class CarController extends Controller
         $cars = $cars->paginate(25, ['*'], 'page', $page);
 
         return response()->json([
-            'cars' => $cars->items(),
+            'data' => $cars->items(),
             'currentPage' => $cars->currentPage(),
             'lastPage' => $cars->lastPage(),
         ], 200);
@@ -366,7 +366,7 @@ class CarController extends Controller
             'car_status',
             'encumbered',
             'transfer_status',
-            'buyer',
+            'buyer.agent',
         ]);
 
         $unitExpenses = $car->unit_expenses();

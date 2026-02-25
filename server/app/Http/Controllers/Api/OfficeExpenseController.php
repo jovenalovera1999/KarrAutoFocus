@@ -24,7 +24,7 @@ class OfficeExpenseController extends Controller
         $expenses = $expenses->paginate(25, ['*'], 'page', $page);
 
         return response()->json([
-            'expenses' => $expenses->items(),
+            'data' => $expenses->items(),
             'currentPage' => $expenses->currentPage(),
             'lastPage' => $expenses->lastPage(),
         ], 200);

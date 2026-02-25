@@ -26,7 +26,7 @@ class CarFactory extends Factory
     {
         return [
             'encode_date' => $this->faker->date(),
-            'year_model' => $this->faker->text(100),
+            'year_model' => $this->faker->text(50),
             'make_id' => Make::inRandomOrder()->first()->make_id,
             'series' => $this->faker->word(),
             'transmission_id' => Transmission::inRandomOrder()->first()->transmission_id,
