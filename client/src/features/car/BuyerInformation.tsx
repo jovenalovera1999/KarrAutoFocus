@@ -7,19 +7,21 @@ import Spinner from "@/components/ui/spinner/Spinner";
 import { useAlert } from "@/context/AlertContext";
 import { useFormat } from "@/hooks/useFormat";
 import { BuyerColumns, BuyerFieldsErrors } from "@/interfaces/BuyerInterface";
+import { CarColumns } from "@/interfaces/CarInterface";
 import BuyerService from "@/services/BuyerService";
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 
 interface BuyerInformationProps {
-  buyerData: BuyerColumns | null;
+  carData: CarColumns | null;
 }
 
-export default function BuyerInformation({ buyerData }: BuyerInformationProps) {
+export default function BuyerInformation({ carData }: BuyerInformationProps) {
   const { showAlert } = useAlert();
   const { handleCommaInNumbersOnTypingFormat } = useFormat();
 
   const [isStoring, setIsStoring] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [carId, setCarId] = useState(0);
   const [buyer, setBuyer] = useState("");
   const [address, setAddress] = useState("");
   const [agreedPrice, setAgreedPrice] = useState("");
@@ -40,7 +42,7 @@ export default function BuyerInformation({ buyerData }: BuyerInformationProps) {
         agent: agent,
       };
 
-      const { status, data } = await BuyerService.storeBuyer(payload);
+      const { status, data } = await BuyerService.storeBuyer(carId, payload);
 
       if (status !== 200) {
         console.error(
@@ -71,6 +73,28 @@ export default function BuyerInformation({ buyerData }: BuyerInformationProps) {
       setIsStoring(false);
     }
   };
+
+  useEffect(() => {
+    setCarId(carData?.car_id ?? 0);
+
+    if (carData?.buyer) {
+      setBuyer(carData?.buyer.buyer);
+      setAddress(carData?.buyer.address);
+      setAgreedPrice(carData?.buyer.agreed_price ?? "");
+      setDateReserved(carData?.buyer.date_reserved ?? "");
+      setAgent(carData?.buyer.agent.agent);
+    }
+  }, [carData?.buyer]);
+
+  useEffect(() => {
+    if (!carData?.buyer) {
+      setBuyer("");
+      setAddress("");
+      setAgreedPrice("");
+      setDateReserved("");
+      setAgent("");
+    }
+  }, [carData?.buyer]);
 
   const handleAgreedPriceChange = (e: ChangeEvent<HTMLInputElement>) => {
     let rawValue = e.target.value.replace(/,/g, "");
@@ -114,7 +138,9 @@ export default function BuyerInformation({ buyerData }: BuyerInformationProps) {
                 <Input
                   type="text"
                   name="agreed_price"
-                  value={handleCommaInNumbersOnTypingFormat(agreedPrice)}
+                  value={handleCommaInNumbersOnTypingFormat(
+                    agreedPrice?.toString(),
+                  )}
                   onChange={handleAgreedPriceChange}
                   errors={fieldErrors.agreed_price}
                 />

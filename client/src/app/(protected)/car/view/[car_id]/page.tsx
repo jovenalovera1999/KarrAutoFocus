@@ -5,6 +5,7 @@ import Spinner from "@/components/ui/spinner/Spinner";
 import Tab from "@/components/ui/tab/Tab";
 import AddUnitExpenseFormModal from "@/features/car/AddUnitExpenseFormModal";
 import BuyerInformation from "@/features/car/BuyerInformation";
+import PaymentDetails from "@/features/car/PaymentDetails";
 import SummarOfExpenses from "@/features/car/SummaryOfExpenses";
 import ViewCar from "@/features/car/ViewCar";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -44,7 +45,7 @@ export default function ViewCarPage() {
   // SHARED STATES
   // ============================
 
-  const [isGetting, setIsGetting] = useState(true);
+  const [isLoadingCarData, setIsLoadingCarData] = useState(true);
 
   const [carData, setCarData] = useState<CarColumns | null>(null);
 
@@ -91,7 +92,13 @@ export default function ViewCarPage() {
           dateToValue,
         );
 
-        if (status !== 200) return;
+        if (status !== 200) {
+          console.error(
+            "Status error during get car data at CarViewPage.tsx: ",
+            status,
+          );
+          return;
+        }
 
         setCarData(data.car);
 
@@ -101,9 +108,12 @@ export default function ViewCarPage() {
 
         setLastPage(data.lastPage);
       } catch (error) {
-        console.error(error);
+        console.error(
+          "Status error during get car data at CarViewPage.tsx: ",
+          error,
+        );
       } finally {
-        setIsGetting(false);
+        setIsLoadingCarData(false);
         loadPage === 1
           ? setIsUnitExpensesLoading(false)
           : setIsMoreUnitExpensesLoading(false);
@@ -124,13 +134,13 @@ export default function ViewCarPage() {
 
   return (
     <>
-      {isGetting && !carId && (
+      {isLoadingCarData && !carId && (
         <div className="flex items-center justify-center min-h-screen">
           <Spinner size="xl" />
         </div>
       )}
 
-      {!isGetting && carId && (
+      {!isLoadingCarData && carId && (
         <>
           <AddUnitExpenseFormModal
             selectedCarId={selectedCarId}
@@ -141,21 +151,27 @@ export default function ViewCarPage() {
 
           <GoBackButton />
 
-          <Tab defaultValue="car_details">
+          <Tab defaultValue="car_information">
             <Tab.List>
-              <Tab.Trigger value="car_details">Car Details</Tab.Trigger>
+              <Tab.Trigger value="car_information">Car Information</Tab.Trigger>
               <Tab.Trigger value="summary_of_expenses">
                 Summary of Expenses
               </Tab.Trigger>
-              {carData?.car_status.car_status !== "Available" && (
-                <Tab.Trigger value="buyer_information">
-                  Buyer Information
-                </Tab.Trigger>
+              {carData?.car_status.car_status.toLowerCase() !== "available" && (
+                <>
+                  <Tab.Trigger value="buyer_information">
+                    Buyer Information
+                  </Tab.Trigger>
+
+                  <Tab.Trigger value="payment_details">
+                    Payment Details
+                  </Tab.Trigger>
+                </>
               )}
             </Tab.List>
 
-            <Tab.Content value="car_details">
-              <ViewCar carData={carData} isGetting={isGetting} />
+            <Tab.Content value="car_information">
+              <ViewCar carData={carData} isLoadingCarData={isLoadingCarData} />
             </Tab.Content>
 
             <Tab.Content value="summary_of_expenses">
@@ -177,10 +193,16 @@ export default function ViewCarPage() {
               />
             </Tab.Content>
 
-            {carData?.car_status.car_status !== "Available" && (
-              <Tab.Content value="buyer_information">
-                <BuyerInformation buyerData={carData?.buyer || null} />
-              </Tab.Content>
+            {carData?.car_status.car_status.toLowerCase() !== "available" && (
+              <>
+                <Tab.Content value="buyer_information">
+                  <BuyerInformation carData={carData} />
+                </Tab.Content>
+
+                <Tab.Content value="payment_details">
+                  <PaymentDetails carData={carData} />
+                </Tab.Content>
+              </>
             )}
           </Tab>
         </>

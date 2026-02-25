@@ -9,30 +9,28 @@ import Label from "@/components/ui/form/Label";
 import Select from "@/components/ui/form/Select";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { useAlert } from "@/context/AlertContext";
+import useApiMutation from "@/hooks/api/useApiMutation";
+import useApiQuery from "@/hooks/api/useApiQuery";
 import { useFormat } from "@/hooks/useFormat";
 import { CarFieldsErrors } from "@/interfaces/CarInterface";
 import { CarStatusColumns } from "@/interfaces/CarStatusInterface";
 import { MakeColumns } from "@/interfaces/MakeInterface";
 import { TransmissionColumns } from "@/interfaces/TransmissionInterface";
 import CarService from "@/services/CarService";
-import {
-  ChangeEvent,
-  FormEvent,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+
+interface CarReferences {
+  makes: MakeColumns[];
+  transmissions: TransmissionColumns[];
+  carStatus: CarStatusColumns[];
+}
 
 export default function AddCarForm() {
   const { showAlert } = useAlert();
   const { handleCommaInNumbersOnTypingFormat } = useFormat();
 
-  const [isReferencesLoading, setIsReferencesLoading] = useState(true);
-  const [makes, setMakes] = useState<MakeColumns[]>([]);
-  const [transmissions, setTransmissions] = useState<TransmissionColumns[]>([]);
-  const [carStatuss, setCarStatuss] = useState<CarStatusColumns[]>([]);
+  const { execute: executeStoreCar, loading: isStoring } = useApiMutation();
 
-  const [isStoring, setIsStoring] = useState(false);
   const [encodeDate, setEncodeDate] = useState("");
   const [yearModel, setYearModel] = useState("");
   const [make, setMake] = useState("");
@@ -60,123 +58,95 @@ export default function AddCarForm() {
   const [address, setAddress] = useState("");
   const [fieldErrors, setFieldErrors] = useState<CarFieldsErrors>({});
 
-  const handleLoadCarReferences = useCallback(async () => {
-    try {
-      const { status, data } = await CarService.loadCarReferences();
-
-      if (status !== 200) {
-        console.error(
-          "Status error during load car references at AddCarForm.tsx: ",
-          status,
-        );
-        return;
-      }
-
-      setMakes(data.makes);
-      setTransmissions(data.transmissions);
-      setCarStatuss(data.carStatus);
-    } catch (error: any) {
-      console.error(
-        "Server error during load car references at AddCarForm.tsx: ",
-        error,
-      );
-    } finally {
-      setIsReferencesLoading(false);
-    }
-  }, []);
+  const {
+    data: carReferencesData,
+    loading: isCarReferencesLoading,
+    load: loadCarReferences,
+  } = useApiQuery<CarReferences>({
+    apiService: () => CarService.loadCarReferences(),
+  });
 
   useEffect(() => {
-    handleLoadCarReferences();
+    loadCarReferences();
   }, []);
 
+  const makes = carReferencesData?.makes ?? [];
+  const transmissions = carReferencesData?.transmissions ?? [];
+  const carStatuss = carReferencesData?.carStatus ?? [];
+
   const handleStoreCar = async (e: FormEvent) => {
-    try {
-      e.preventDefault();
-      setIsStoring(true);
+    e.preventDefault();
 
-      const payload = {
-        encode_date: encodeDate,
-        year_model: yearModel,
-        make: make,
-        series: series,
-        transmission: transmission,
-        color: color,
-        price: price,
-        plate_number: plateNumber,
-        mother_file: motherFile,
-        mv_file_number: mvFileNumber,
-        engine_number: engineNumber,
-        chassis_number: chassisNumber,
-        engine_cc: engineCc,
-        status: carStatus,
-        original_or_cr_received: originalOrCrReceived,
-        encumbered: encumbered,
-        rod_received: rodReceived,
-        rod_paid: rodPaid,
-        last_registered: lastRegistered,
-        confirmation_request: confirmationRequest,
-        confirmation_received: confirmationReceived,
-        hpg_clearance: hpgClearance,
-        transfer_status: transferStatus,
-        first_owner: firstOwner,
-        address: address,
-      };
+    const payload = {
+      encode_date: encodeDate,
+      year_model: yearModel,
+      make: make,
+      series: series,
+      transmission: transmission,
+      color: color,
+      price: price,
+      plate_number: plateNumber,
+      mother_file: motherFile,
+      mv_file_number: mvFileNumber,
+      engine_number: engineNumber,
+      chassis_number: chassisNumber,
+      engine_cc: engineCc,
+      status: carStatus,
+      original_or_cr_received: originalOrCrReceived,
+      encumbered: encumbered,
+      rod_received: rodReceived,
+      rod_paid: rodPaid,
+      last_registered: lastRegistered,
+      confirmation_request: confirmationRequest,
+      confirmation_received: confirmationReceived,
+      hpg_clearance: hpgClearance,
+      transfer_status: transferStatus,
+      first_owner: firstOwner,
+      address: address,
+    };
 
-      const { status, data } = await CarService.storeCar(payload);
+    executeStoreCar({
+      apiService: () => CarService.storeCar(payload),
 
-      if (status !== 200) {
-        console.error(
-          "Status error during store car at AddCarForm.tsx: ",
-          status,
-        );
-        return;
-      }
+      onSuccess: (data) => {
+        showAlert({
+          variant: "success",
+          title: "Success",
+          message: data.message,
+        });
 
-      showAlert({
-        variant: "success",
-        title: "Success",
-        message: data.message,
-      });
+        setEncodeDate("");
+        setYearModel("");
+        setMake("");
+        setSeries("");
+        setTransmission("");
+        setColor("");
+        setPrice("");
+        setPlateNumber("");
+        setMotherFile("");
+        setMvFileNumber("");
+        setEngineNumber("");
+        setChassisNumber("");
+        setEngineCc("");
+        setCarStatus("");
+        setOriginalOrCrReceived("");
+        setEncumbered("");
+        setRodReceived("");
+        setRodPaid("");
+        setLastRegistered("");
+        setConfirmationRequest("");
+        setConfirmationReceived("");
+        setHpgClearance("");
+        setTransferStatus("");
+        setFirstOwner("");
+        setAddress("");
+        setFieldErrors({});
+      },
 
-      setEncodeDate("");
-      setYearModel("");
-      setMake("");
-      setSeries("");
-      setTransmission("");
-      setColor("");
-      setPrice("");
-      setPlateNumber("");
-      setMotherFile("");
-      setMvFileNumber("");
-      setEngineNumber("");
-      setChassisNumber("");
-      setEngineCc("");
-      setCarStatus("");
-      setOriginalOrCrReceived("");
-      setEncumbered("");
-      setRodReceived("");
-      setRodPaid("");
-      setLastRegistered("");
-      setConfirmationRequest("");
-      setConfirmationReceived("");
-      setHpgClearance("");
-      setTransferStatus("");
-      setFirstOwner("");
-      setAddress("");
-      setFieldErrors({});
-    } catch (error: any) {
-      if (error.response && error.response.status !== 422) {
-        console.error(
-          "Server error during store car at AddCarForm.tsx: ",
-          error,
-        );
-        return;
-      }
-
-      setFieldErrors(error.response.data.errors);
-    } finally {
-      setIsStoring(false);
-    }
+      onValidationError: (errors) => {
+        setFieldErrors(errors);
+      },
+    });
   };
 
   const handlePriceChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -191,7 +161,7 @@ export default function AddCarForm() {
 
   return (
     <>
-      {isReferencesLoading &&
+      {isCarReferencesLoading &&
         makes.length <= 0 &&
         transmissions.length <= 0 &&
         carStatuss.length <= 0 && (
@@ -200,7 +170,7 @@ export default function AddCarForm() {
           </div>
         )}
 
-      {!isReferencesLoading &&
+      {!isCarReferencesLoading &&
         makes.length > 0 &&
         transmissions.length > 0 &&
         carStatuss.length > 0 && (

@@ -45,9 +45,6 @@ export default function SummarOfExpenses({
   lastPage,
   handleGetCar,
 }: SummarOfExpensesProps) {
-  const params = useParams();
-  const carId = params.car_id as string;
-
   const { handleNumberDecimalFormat, handleDateTimeFormat } = useFormat();
 
   const tableRef = useRef<HTMLDivElement>(null);
@@ -97,7 +94,7 @@ export default function SummarOfExpenses({
                   Buyer
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {carData?.buyer?.buyer || "-"}
+                  {carData?.buyer?.buyer ?? "-"}
                 </p>
               </div>
             </div>
@@ -107,7 +104,7 @@ export default function SummarOfExpenses({
                   Selling Price
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {handleNumberDecimalFormat(carData?.price || "-") || "-"}
+                  {handleNumberDecimalFormat(carData?.price ?? "-") ?? "-"}
                 </p>
               </div>
               <div className="mb-3 md:mb-0">
@@ -115,7 +112,9 @@ export default function SummarOfExpenses({
                   Agreed Price
                 </p>
                 <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                  {"-"}
+                  {handleNumberDecimalFormat(
+                    carData?.buyer?.agreed_price ?? 0,
+                  ) ?? "-"}
                 </p>
               </div>
             </div>

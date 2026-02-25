@@ -7,7 +7,7 @@ import { useSidebar } from "@/context/SidebarContext";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
-import CompanyLogo from "@/img/ui/CompanyLogo.png";
+import KarrAutoFocusLogo from "@/img/ui/KarrAutoFocusLogo.png";
 
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
@@ -87,17 +87,17 @@ const AppHeader: React.FC = () => {
 
           <Link href="/" className="lg:hidden">
             <Image
-              width={60}
-              height={32}
+              width={120}
+              height={92}
               className="dark:hidden"
-              src={CompanyLogo}
+              src={KarrAutoFocusLogo}
               alt="Company Logo"
             />
             <Image
-              width={60}
-              height={32}
+              width={120}
+              height={92}
               className="hidden dark:block"
-              src={CompanyLogo}
+              src={KarrAutoFocusLogo}
               alt="Company Logo"
             />
           </Link>

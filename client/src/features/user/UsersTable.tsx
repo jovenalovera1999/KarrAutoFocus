@@ -11,11 +11,13 @@ import {
 import { useFormat } from "@/hooks/useFormat";
 import { UserColumns } from "@/interfaces/UserInterface";
 import UserService from "@/services/UserService";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PencilIcon, TrashBinIcon } from "@/icons/index";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { useDebounce } from "@/hooks/useDebounce";
 import IconButton from "@/components/ui/button/IconButton";
+import Badge from "@/components/ui/badge/Badge";
+import useApiInfiniteScrollQuery from "@/hooks/api/useApiInfiniteScrollQuery";
 
 interface UsersTableProps {
   onCreateUser: () => void;
@@ -30,89 +32,33 @@ export default function UsersTable({
   onDeleteUser,
   refreshUsers,
 }: UsersTableProps) {
-  const { handleFullNameFormat, handleDateFormat } = useFormat();
+  const { handleFullNameFormat, handleDateFormat, handleDateTimeFormat } =
+    useFormat();
 
-  const [isUsersLoading, setIsUsersLoading] = useState(false);
-  const [isMoreUsersLoading, setIsMoreUsersLoading] = useState(false);
-  const [users, setUsers] = useState<UserColumns[]>([]);
-  const [lastPage, setLastPage] = useState<number | null>(null);
   const [search, setSearch] = useState("");
-
   const debouncedSearch = useDebounce(search);
 
   const tableRef = useRef<HTMLDivElement>(null);
-  const pageRef = useRef(1);
 
-  const handleLoadUsers = useCallback(
-    async (loadPage: number, searchValue: string) => {
-      try {
-        if (
-          (loadPage === 1 && isUsersLoading) ||
-          (loadPage > 1 && isMoreUsersLoading) ||
-          (lastPage !== null && loadPage > lastPage)
-        ) {
-          return;
-        }
+  const {
+    items: users,
+    load: loadUsers,
+    handleScroll,
+    isLoading: isLoadingUsers,
+    isLoadingMore: isLoadingMoreUsers,
+    reset: resetUsersTable,
+  } = useApiInfiniteScrollQuery<UserColumns>({
+    apiService: (page) => UserService.loadUsers(page, debouncedSearch),
+  });
 
-        loadPage === 1 ? setIsUsersLoading(true) : setIsMoreUsersLoading(true);
-
-        const { status, data } = await UserService.loadUsers(
-          loadPage,
-          searchValue,
-        );
-
-        if (status !== 200) {
-          console.error(
-            "Status error during load users at UsersTable.tsx: ",
-            status,
-          );
-          return;
-        }
-
-        setUsers((prev) =>
-          loadPage === 1 ? data.users : [...prev, ...data.users],
-        );
-        setLastPage(data.lastPage);
-      } catch (error: any) {
-        console.error(
-          "Server error during load users at UsersTable.tsx: ",
-          error,
-        );
-      } finally {
-        loadPage === 1
-          ? setIsUsersLoading(false)
-          : setIsMoreUsersLoading(false);
-      }
-    },
-    [isUsersLoading, isMoreUsersLoading, lastPage],
-  );
+  const onScroll = () => {
+    handleScroll(tableRef.current);
+  };
 
   useEffect(() => {
-    pageRef.current = 1;
-    setLastPage(null);
-    setUsers([]);
-
-    handleLoadUsers(1, debouncedSearch);
+    resetUsersTable();
+    loadUsers(1);
   }, [refreshUsers, debouncedSearch]);
-
-  const handleScroll = useCallback(() => {
-    if (
-      !tableRef.current ||
-      isUsersLoading ||
-      isMoreUsersLoading ||
-      (lastPage && pageRef.current >= lastPage)
-    ) {
-      return;
-    }
-
-    const { scrollTop, scrollHeight, clientHeight } = tableRef.current;
-
-    if (scrollTop + clientHeight >= scrollHeight - 50) {
-      const nextPage = pageRef.current + 1;
-      pageRef.current = nextPage;
-      handleLoadUsers(nextPage, debouncedSearch);
-    }
-  }, [isUsersLoading, isMoreUsersLoading, lastPage, handleLoadUsers]);
 
   const headers = [
     "No.",
@@ -120,6 +66,7 @@ export default function UsersTable({
     "Birth Date",
     "Branch Assigned",
     "Role",
+    "Date Created",
     "Actions",
   ];
 
@@ -147,7 +94,7 @@ export default function UsersTable({
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
         <div
           ref={tableRef}
-          onScroll={handleScroll}
+          onScroll={onScroll}
           className="w-full max-h-[calc(100vh-20.5rem)] overflow-x-auto overflow-y-auto"
         >
           <div className="w-full min-w-full">
@@ -169,7 +116,7 @@ export default function UsersTable({
 
               {/* Table Body */}
               <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
-                {isUsersLoading && users.length <= 0 && (
+                {isLoadingUsers && users.length <= 0 && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"
@@ -202,7 +149,15 @@ export default function UsersTable({
                       {user.branch.branch}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                      {user.role.role}
+                      <Badge
+                        size="sm"
+                        color={`${user.role.role.toLowerCase() === "admin" ? "error" : user.role.role.toLowerCase() === "manager" ? "success" : "info"}`}
+                      >
+                        {user.role.role}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                      {handleDateTimeFormat(user.created_at)}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                       <div className="flex gap-2">
@@ -229,7 +184,7 @@ export default function UsersTable({
                   </TableRow>
                 ))}
 
-                {isMoreUsersLoading && (
+                {isLoadingMoreUsers && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"
@@ -242,7 +197,7 @@ export default function UsersTable({
                   </TableRow>
                 )}
 
-                {!isUsersLoading && users.length <= 0 && (
+                {!isLoadingUsers && users.length <= 0 && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"

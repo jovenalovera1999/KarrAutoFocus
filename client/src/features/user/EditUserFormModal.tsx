@@ -1,3 +1,5 @@
+"use client";
+
 import Button from "@/components/ui/button/Button";
 import Form from "@/components/ui/form/Form";
 import Input from "@/components/ui/form/Input";
@@ -6,11 +8,18 @@ import Select from "@/components/ui/form/Select";
 import { Modal } from "@/components/ui/modal";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { useAlert } from "@/context/AlertContext";
+import useApiMutation from "@/hooks/api/useApiMutation";
+import useApiQuery from "@/hooks/api/useApiQuery";
 import { BranchColumns } from "@/interfaces/BranchInterface";
 import { RoleColumns } from "@/interfaces/RoleInterface";
 import { UserColumns, UserFieldsErrors } from "@/interfaces/UserInterface";
 import UserService from "@/services/UserService";
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
+
+interface UserReferences {
+  branches: BranchColumns[];
+  roles: RoleColumns[];
+}
 
 interface EditUserFormModalProps {
   isOpen: boolean;
@@ -26,12 +35,8 @@ export default function EditUserFormModal({
   refreshUsers,
 }: EditUserFormModalProps) {
   const { showAlert } = useAlert();
+  const { execute: executeUpdateUser, loading: isUpdating } = useApiMutation();
 
-  const [isReferencesLoading, setIsReferencesLoading] = useState(true);
-  const [branches, setBranches] = useState<BranchColumns[]>([]);
-  const [roles, setRoles] = useState<RoleColumns[]>([]);
-
-  const [isUpdating, setIsUpdating] = useState(false);
   const [userId, setUserId] = useState(0);
   const [firstName, setFirstName] = useState("");
   const [middleName, setMiddleName] = useState("");
@@ -44,83 +49,55 @@ export default function EditUserFormModal({
   const [role, setRole] = useState("");
   const [fieldErrors, setFieldErrors] = useState<UserFieldsErrors>({});
 
-  const handleLoadUserReferences = useCallback(async () => {
-    try {
-      const { status, data } = await UserService.loadUserReferences();
-
-      if (status !== 200) {
-        console.error(
-          "Status error during load user references at CreateUserFormModal.tsx: ",
-          status,
-        );
-        return;
-      }
-
-      setBranches(data.branches);
-      setRoles(data.roles);
-    } catch (error: any) {
-      console.error(
-        "Server error during load user references at CreateUserFormModal.tsx: ",
-        error,
-      );
-    } finally {
-      setIsReferencesLoading(false);
-    }
-  }, []);
+  const {
+    data: userReferencesData,
+    loading: isUserReferencesLoading,
+    load: loadUserReferences,
+  } = useApiQuery<UserReferences>({
+    apiService: () => UserService.loadUserReferences(),
+  });
 
   useEffect(() => {
     if (isOpen) {
-      handleLoadUserReferences();
+      loadUserReferences();
     }
   }, [isOpen]);
 
+  const branches = userReferencesData?.branches ?? [];
+  const roles = userReferencesData?.roles ?? [];
+
   const handleUpdateUser = async (e: FormEvent) => {
-    try {
-      e.preventDefault();
-      setIsUpdating(true);
+    e.preventDefault();
 
-      const payload = {
-        first_name: firstName,
-        middle_name: middleName,
-        last_name: lastName,
-        suffix_name: suffixName,
-        birth_date: birthDate,
-        contact_number: contactNumber,
-        email: email,
-        branch_assigned: branchAssigned,
-        role: role,
-      };
+    const payload = {
+      first_name: firstName,
+      middle_name: middleName,
+      last_name: lastName,
+      suffix_name: suffixName,
+      birth_date: birthDate,
+      contact_number: contactNumber,
+      email: email,
+      branch_assigned: branchAssigned,
+      role: role,
+    };
 
-      const { status, data } = await UserService.updateUser(userId, payload);
+    executeUpdateUser({
+      apiService: () => UserService.updateUser(userId, payload),
 
-      if (status !== 200) {
-        console.error(
-          "Status error during update user at EditUserFormModal.tsx: ",
-          status,
-        );
-        return;
-      }
+      onSuccess: (data) => {
+        showAlert({
+          variant: "success",
+          title: "Update Success",
+          message: data.message,
+        });
 
-      showAlert({
-        variant: "success",
-        title: "Success",
-        message: data.message,
-      });
+        refreshUsers();
+      },
 
-      setFieldErrors({});
-      refreshUsers();
-    } catch (error: any) {
-      if (error.response && error.response.status !== 422) {
-        console.error(
-          "Server error during update at EditUserFormModal.tsx: ",
-          error,
-        );
-      }
-
-      setFieldErrors(error.response.data.errors);
-    } finally {
-      setIsUpdating(false);
-    }
+      onValidationError: (errors) => {
+        setFieldErrors(errors);
+      },
+    });
   };
 
   useEffect(() => {
@@ -161,14 +138,16 @@ export default function EditUserFormModal({
         onClose={onClose}
         className="max-w-150 p-5 lg:p-10"
       >
-        {isReferencesLoading && branches.length <= 0 && roles.length <= 0 && (
-          <div className="flex items-center justify-center">
-            <Spinner size="xl" />
-          </div>
-        )}
+        {isUserReferencesLoading &&
+          branches.length <= 0 &&
+          roles.length <= 0 && (
+            <div className="flex items-center justify-center">
+              <Spinner size="xl" />
+            </div>
+          )}
 
         {selectedUser &&
-          !isReferencesLoading &&
+          !isUserReferencesLoading &&
           branches.length > 0 &&
           roles.length > 0 && (
             <Form onSubmit={handleUpdateUser}>

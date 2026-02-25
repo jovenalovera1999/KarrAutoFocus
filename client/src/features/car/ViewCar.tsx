@@ -2,37 +2,20 @@
 
 import ComponentCard from "@/components/common/ComponentCard";
 import Badge from "@/components/ui/badge/Badge";
-import Button from "@/components/ui/button/Button";
-import GoBackButton from "@/components/ui/button/GoBackButton";
-import Input from "@/components/ui/form/Input";
-import Label from "@/components/ui/form/Label";
-import Spinner from "@/components/ui/spinner/Spinner";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { useDebounce } from "@/hooks/useDebounce";
 import { useFormat } from "@/hooks/useFormat";
 import { CarColumns } from "@/interfaces/CarInterface";
-import { UnitExpenseColumns } from "@/interfaces/UnitExpenseInterface";
-import CarService from "@/services/CarService";
-import { useParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
 
 interface ViewCarProps {
   carData: CarColumns | null;
-  isGetting: boolean;
+  isLoadingCarData: boolean;
 }
 
-export default function ViewCar({ carData, isGetting }: ViewCarProps) {
+export default function ViewCar({ carData, isLoadingCarData }: ViewCarProps) {
   const { handleDateFormat, handleNumberDecimalFormat } = useFormat();
 
   return (
     <>
-      {!isGetting && carData?.car_id && (
+      {!isLoadingCarData && carData?.car_id && (
         <>
           <div className="flex flex-col gap-6 mb-4">
             <ComponentCard title="Car Details">
@@ -151,7 +134,7 @@ export default function ViewCar({ carData, isGetting }: ViewCarProps) {
                     <p>
                       <Badge
                         size="sm"
-                        color={`${carData?.car_status.car_status === "Available" ? "success" : carData?.car_status.car_status === "Reserved" ? "warning" : "info"}`}
+                        color={`${carData?.car_status.car_status.toLowerCase() === "available" ? "success" : carData?.car_status.car_status.toLowerCase() === "reserved" ? "warning" : "info"}`}
                       >
                         {carData?.car_status.car_status}
                       </Badge>

@@ -14,6 +14,8 @@ export interface UserColumns {
   password: string;
   role: RoleColumns;
   branch: BranchColumns;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface UserFieldsErrors {

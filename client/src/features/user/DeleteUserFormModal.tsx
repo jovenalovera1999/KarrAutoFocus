@@ -5,6 +5,8 @@ import Label from "@/components/ui/form/Label";
 import { Modal } from "@/components/ui/modal";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { useAlert } from "@/context/AlertContext";
+import useApiMutation from "@/hooks/api/useApiMutation";
+import { useFormat } from "@/hooks/useFormat";
 import { UserColumns } from "@/interfaces/UserInterface";
 import UserService from "@/services/UserService";
 import { FormEvent, useEffect, useState } from "react";
@@ -23,8 +25,9 @@ export default function DeleteUserFormModal({
   refreshUsers,
 }: DeleteUserFormModalProps) {
   const { showAlert } = useAlert();
+  const { handleDateFormat } = useFormat();
+  const { execute: executeUserDelete, loading: isDeleting } = useApiMutation();
 
-  const [isDestroying, setIsDestroying] = useState(false);
   const [userId, setUserId] = useState(0);
   const [firstName, setFirstName] = useState("");
   const [middleName, setMiddleName] = useState("");
@@ -37,36 +40,22 @@ export default function DeleteUserFormModal({
   const [role, setRole] = useState("");
 
   const handleDestroyUser = async (e: FormEvent) => {
-    try {
-      e.preventDefault();
-      setIsDestroying(true);
+    e.preventDefault();
 
-      const { status, data } = await UserService.deleteUser(userId);
+    executeUserDelete({
+      apiService: () => UserService.deleteUser(userId),
 
-      if (status !== 200) {
-        console.error(
-          "Status error during destroy user at DeleteUserFormModal.tsx: ",
-          status,
-        );
-        return;
-      }
+      onSuccess: (data) => {
+        showAlert({
+          variant: "success",
+          title: "Delete Success",
+          message: data.message,
+        });
 
-      showAlert({
-        variant: "success",
-        title: "Success",
-        message: data.message,
-      });
-
-      onClose();
-      refreshUsers();
-    } catch (error: any) {
-      console.error(
-        "Server error during destroy at DeleteUserFormModal.tsx: ",
-        error,
-      );
-    } finally {
-      setIsDestroying(false);
-    }
+        onClose();
+        refreshUsers();
+      },
+    });
   };
 
   useEffect(() => {
@@ -109,73 +98,79 @@ export default function DeleteUserFormModal({
         <Form onSubmit={handleDestroyUser}>
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div className="col-span-2 md:col-span-1">
-              <div className="mb-4">
-                <Label required>First Name</Label>
-                <Input
-                  type="text"
-                  name="first_name"
-                  value={firstName}
-                  readOnly
-                />
+              <div className="mb-7">
+                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                  First Name
+                </p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  {firstName}
+                </p>
               </div>
-              <div className="mb-4">
-                <Label>Middle Name</Label>
-                <Input
-                  type="text"
-                  name="middle_name"
-                  value={middleName}
-                  readOnly
-                />
+              <div className="mb-7">
+                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                  Middle Name
+                </p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  {middleName}
+                </p>
               </div>
-              <div className="mb-4">
-                <Label required>Last Name</Label>
-                <Input type="text" name="last_name" value={lastName} readOnly />
+              <div className="mb-7">
+                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                  Last Name
+                </p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  {lastName}
+                </p>
               </div>
-              <div className="mb-4">
-                <Label>Suffix Name</Label>
-                <Input
-                  type="text"
-                  name="suffix_name"
-                  value={suffixName}
-                  readOnly
-                />
+              <div className="mb-7">
+                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                  Suffix Name
+                </p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  {suffixName}
+                </p>
               </div>
               <div>
-                <Label required>Birth Date</Label>
-                <Input
-                  type="date"
-                  name="birth_date"
-                  value={birthDate}
-                  readOnly
-                />
+                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                  Birth Date
+                </p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  {handleDateFormat(birthDate)}
+                </p>
               </div>
             </div>
             <div className="col-span-2 md:col-span-1">
-              <div className="mb-4">
-                <Label required>Contact Number</Label>
-                <Input
-                  type="text"
-                  name="contact_number"
-                  value={contactNumber}
-                  readOnly
-                />
+              <div className="mb-7">
+                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                  Contact Number
+                </p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  {contactNumber}
+                </p>
               </div>
-              <div className="mb-4">
-                <Label>Email</Label>
-                <Input type="text" name="email" value={email} readOnly />
+              <div className="mb-7">
+                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                  Email
+                </p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  {email}
+                </p>
               </div>
-              <div className="mb-4">
-                <Label required>Branch Assigned</Label>
-                <Input
-                  type="text"
-                  name="branch_assigned"
-                  value={branchAssigned}
-                  readOnly
-                />
+              <div className="mb-7">
+                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                  Branch Assigned
+                </p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  {branchAssigned}
+                </p>
               </div>
               <div>
-                <Label required>Role</Label>
-                <Input type="text" name="role" value={role} readOnly />
+                <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                  Role
+                </p>
+                <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                  {role}
+                </p>
               </div>
             </div>
           </div>
@@ -183,9 +178,9 @@ export default function DeleteUserFormModal({
             <Button
               type="submit"
               className="w-full bg-red-500 hover:bg-red-600 disabled:bg-red-300"
-              disabled={isDestroying}
+              disabled={isDeleting}
             >
-              {isDestroying ? (
+              {isDeleting ? (
                 <>
                   <div className="flex gap-2">
                     <Spinner size="xs" />

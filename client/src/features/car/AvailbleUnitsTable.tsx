@@ -10,106 +10,42 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import useApiInfiniteScrollQuery from "@/hooks/api/useApiInfiniteScrollQuery";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useFormat } from "@/hooks/useFormat";
 import { FileIcon, PencilIcon, TrashBinIcon } from "@/icons";
 import { CarColumns } from "@/interfaces/CarInterface";
 import CarService from "@/services/CarService";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function AvaiableUnitsTable() {
   const { handleNumberDecimalFormat, handleDateFormat } = useFormat();
 
-  const [isAvailableUnitsLoading, setIsAvailableUnitsLoading] = useState(false);
-  const [isMoreAvailableUnitsLoading, setIsMoreAvailableUnitsLoading] =
-    useState(false);
-  const [availableUnits, setAvailableUnits] = useState<CarColumns[]>([]);
-  const [lastPage, setLastPage] = useState<number | null>(null);
   const [search, setSearch] = useState("");
-
   const debouncedSearch = useDebounce(search);
 
   const tableRef = useRef<HTMLDivElement>(null);
-  const pageRef = useRef(1);
 
-  const handleLoadUsers = useCallback(
-    async (loadPage: number, searchValue: string) => {
-      try {
-        if (
-          (loadPage === 1 && isAvailableUnitsLoading) ||
-          (loadPage > 1 && isMoreAvailableUnitsLoading) ||
-          (lastPage !== null && loadPage > lastPage)
-        ) {
-          return;
-        }
+  const {
+    items: availableUnits,
+    load: loadAvailableUnits,
+    handleScroll,
+    isLoading: isLoadingAvailableUnits,
+    isLoadingMore: isLoadingMoreAvailableUnits,
+    reset: resetAvailableUnitsTable,
+  } = useApiInfiniteScrollQuery<CarColumns>({
+    apiService: (page) => CarService.loadAvailableUnits(page, debouncedSearch),
+  });
 
-        loadPage === 1
-          ? setIsAvailableUnitsLoading(true)
-          : setIsMoreAvailableUnitsLoading(true);
-
-        const { status, data } = await CarService.loadAvailableUnits(
-          loadPage,
-          searchValue,
-        );
-
-        if (status !== 200) {
-          console.error(
-            "Status error during load cars available units at AvailableUnitsTable.tsx: ",
-            status,
-          );
-          return;
-        }
-
-        setAvailableUnits((prev) =>
-          loadPage === 1 ? data.cars : [...prev, ...data.cars],
-        );
-        setLastPage(data.lastPage);
-      } catch (error: any) {
-        console.error(
-          "Server error during load cars available units at AvailableUnitsTable.tsx: ",
-          error,
-        );
-      } finally {
-        loadPage === 1
-          ? setIsAvailableUnitsLoading(false)
-          : setIsMoreAvailableUnitsLoading(false);
-      }
-    },
-    [isAvailableUnitsLoading, isMoreAvailableUnitsLoading, lastPage],
-  );
+  const onScroll = () => {
+    handleScroll(tableRef.current);
+  };
 
   useEffect(() => {
-    pageRef.current = 1;
-    setLastPage(null);
-    setAvailableUnits([]);
-
-    handleLoadUsers(1, debouncedSearch);
+    resetAvailableUnitsTable();
+    loadAvailableUnits(1);
   }, [debouncedSearch]);
-
-  const handleScroll = useCallback(() => {
-    if (
-      !tableRef.current ||
-      isAvailableUnitsLoading ||
-      isMoreAvailableUnitsLoading ||
-      (lastPage && pageRef.current >= lastPage)
-    ) {
-      return;
-    }
-
-    const { scrollTop, scrollHeight, clientHeight } = tableRef.current;
-
-    if (scrollTop + clientHeight >= scrollHeight - 50) {
-      const nextPage = pageRef.current + 1;
-      pageRef.current = nextPage;
-      handleLoadUsers(nextPage, debouncedSearch);
-    }
-  }, [
-    isAvailableUnitsLoading,
-    isMoreAvailableUnitsLoading,
-    lastPage,
-    handleLoadUsers,
-  ]);
 
   const headers = [
     "No.",
@@ -136,8 +72,8 @@ export default function AvaiableUnitsTable() {
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
         <div
           ref={tableRef}
-          onScroll={handleScroll}
-          className="w-full max-h-[calc(100vh-20.5rem)] overflow-x-auto overflow-y-auto"
+          onScroll={onScroll}
+          className="w-full max-h-[calc(100vh-18rem)] md:max-h-[calc(100vh-20.5rem)] overflow-x-auto overflow-y-auto"
         >
           <div className="w-full min-w-full">
             <Table>
@@ -158,7 +94,7 @@ export default function AvaiableUnitsTable() {
 
               {/* Table Body */}
               <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
-                {isAvailableUnitsLoading && availableUnits.length <= 0 && (
+                {isLoadingAvailableUnits && availableUnits.length <= 0 && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"
@@ -218,7 +154,7 @@ export default function AvaiableUnitsTable() {
                   </TableRow>
                 ))}
 
-                {isMoreAvailableUnitsLoading && (
+                {isLoadingMoreAvailableUnits && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"
@@ -231,7 +167,7 @@ export default function AvaiableUnitsTable() {
                   </TableRow>
                 )}
 
-                {!isAvailableUnitsLoading && availableUnits.length <= 0 && (
+                {!isLoadingAvailableUnits && availableUnits.length <= 0 && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"

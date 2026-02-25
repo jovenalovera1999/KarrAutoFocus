@@ -9,13 +9,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useFormat } from "@/hooks/useFormat";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PencilIcon, TrashBinIcon } from "@/icons/index";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { useDebounce } from "@/hooks/useDebounce";
 import IconButton from "@/components/ui/button/IconButton";
-import ExpenseService from "@/services/OfficeExpenseService";
 import { OfficeExpenseColumns } from "@/interfaces/OfficeExpenseInterface";
+import useApiInfiniteScrollQuery from "@/hooks/api/useApiInfiniteScrollQuery";
+import OfficeExpenseService from "@/services/OfficeExpenseService";
 
 interface OfficeExpensesTableProps {
   onAddExpense: () => void;
@@ -26,15 +27,9 @@ export default function OfficeExpensesTable({
   onAddExpense,
   refreshExpenses,
 }: OfficeExpensesTableProps) {
-  const { handleNumberDecimalFormat, handleDateFormat } = useFormat();
+  const { handleNumberDecimalFormat, handleDateFormat, handleDateTimeFormat } =
+    useFormat();
 
-  const [isOfficeExpensesLoading, setIsOfficeExpensesLoading] = useState(false);
-  const [isMoreOfficeExpensesLoading, setIsMoreOfficeExpensesLoading] =
-    useState(false);
-  const [officeExpenses, setOfficeExpenses] = useState<OfficeExpenseColumns[]>(
-    [],
-  );
-  const [lastPage, setLastPage] = useState<number | null>(null);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
@@ -42,86 +37,31 @@ export default function OfficeExpensesTable({
   const debouncedDateTo = useDebounce(dateTo);
 
   const tableRef = useRef<HTMLDivElement>(null);
-  const pageRef = useRef(1);
 
-  const handleLoadOfficeExpenses = useCallback(
-    async (loadPage: number, dateFromValue: string, dateToValue: string) => {
-      try {
-        if (
-          (loadPage === 1 && isOfficeExpensesLoading) ||
-          (loadPage > 1 && isMoreOfficeExpensesLoading) ||
-          (lastPage !== null && loadPage > lastPage)
-        ) {
-          return;
-        }
+  const {
+    items: officeExpenses,
+    load: loadOfficeExpenses,
+    handleScroll,
+    isLoading: isOfficeExpensesLoading,
+    isLoadingMore: isMoreOfficeExpensesLoading,
+    reset: resetExpensesTable,
+  } = useApiInfiniteScrollQuery<OfficeExpenseColumns>({
+    apiService: (page) =>
+      OfficeExpenseService.loadOfficeExpenses(
+        page,
+        debouncedDateFrom,
+        debouncedDateTo,
+      ),
+  });
 
-        loadPage === 1
-          ? setIsOfficeExpensesLoading(true)
-          : setIsMoreOfficeExpensesLoading(true);
-
-        const { status, data } = await ExpenseService.loadOfficeExpenses(
-          loadPage,
-          dateFromValue,
-          dateToValue,
-        );
-
-        if (status !== 200) {
-          console.error(
-            "Status error during load expenses at ExpensesTable.tsx: ",
-            status,
-          );
-          return;
-        }
-
-        setOfficeExpenses((prev) =>
-          loadPage === 1 ? data.expenses : [...prev, ...data.expenses],
-        );
-        setLastPage(data.lastPage);
-      } catch (error: any) {
-        console.error(
-          "Server error during load expenses at ExpensesTable.tsx: ",
-          error,
-        );
-      } finally {
-        loadPage === 1
-          ? setIsOfficeExpensesLoading(false)
-          : setIsMoreOfficeExpensesLoading(false);
-      }
-    },
-    [isOfficeExpensesLoading, isMoreOfficeExpensesLoading, lastPage],
-  );
+  const onScroll = () => {
+    handleScroll(tableRef.current);
+  };
 
   useEffect(() => {
-    pageRef.current = 1;
-    setLastPage(null);
-    setOfficeExpenses([]);
-
-    handleLoadOfficeExpenses(1, debouncedDateFrom, debouncedDateTo);
-  }, [refreshExpenses, debouncedDateFrom, debouncedDateTo]);
-
-  const handleScroll = useCallback(() => {
-    if (
-      !tableRef.current ||
-      isOfficeExpensesLoading ||
-      isMoreOfficeExpensesLoading ||
-      (lastPage && pageRef.current >= lastPage)
-    ) {
-      return;
-    }
-
-    const { scrollTop, scrollHeight, clientHeight } = tableRef.current;
-
-    if (scrollTop + clientHeight >= scrollHeight - 50) {
-      const nextPage = pageRef.current + 1;
-      pageRef.current = nextPage;
-      handleLoadOfficeExpenses(nextPage, debouncedDateFrom, debouncedDateTo);
-    }
-  }, [
-    isOfficeExpensesLoading,
-    isMoreOfficeExpensesLoading,
-    lastPage,
-    handleLoadOfficeExpenses,
-  ]);
+    resetExpensesTable();
+    loadOfficeExpenses(1);
+  }, [refreshExpenses]);
 
   const headers = [
     "No.",
@@ -168,7 +108,7 @@ export default function OfficeExpensesTable({
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
         <div
           ref={tableRef}
-          onScroll={handleScroll}
+          onScroll={onScroll}
           className="w-full max-h-[calc(100vh-20.5rem)] overflow-x-auto overflow-y-auto"
         >
           <div className="w-full min-w-full">
@@ -221,7 +161,7 @@ export default function OfficeExpensesTable({
                       {officeExpense.description}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                      {handleDateFormat(officeExpense.created_at)}
+                      {handleDateTimeFormat(officeExpense.created_at)}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                       <div className="flex gap-2">

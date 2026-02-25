@@ -6,73 +6,64 @@ import TextArea from "@/components/ui/form/TextArea";
 import { Modal } from "@/components/ui/modal";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { useAlert } from "@/context/AlertContext";
+import useApiMutation from "@/hooks/api/useApiMutation";
 import { useFormat } from "@/hooks/useFormat";
 import { OfficeExpenseFieldsErrors } from "@/interfaces/OfficeExpenseInterface";
-import ExpenseService from "@/services/OfficeExpenseService";
+import OfficeExpenseService from "@/services/OfficeExpenseService";
 import { ChangeEvent, FormEvent, useState } from "react";
 
 interface AddOfficeExpenseFormModalProps {
   isOpen: boolean;
   onClose: () => void;
+  refreshOfficeExpenses: () => void;
 }
 
 export default function AddOfficeExpenseFormModal({
   isOpen,
   onClose,
+  refreshOfficeExpenses,
 }: AddOfficeExpenseFormModalProps) {
+  const { execute: executeStoreOfficeExpense, loading: isStoring } =
+    useApiMutation();
   const { showAlert } = useAlert();
   const { handleCommaInNumbersOnTypingFormat } = useFormat();
 
-  const [isStoring, setIsStoring] = useState(false);
   const [incurrenceDate, setIncurrenceDate] = useState("");
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [fieldErrors, setFieldErrors] = useState<OfficeExpenseFieldsErrors>({});
 
-  const handleStoreOfficeExpense = async (e: FormEvent) => {
-    try {
-      e.preventDefault();
-      setIsStoring(true);
+  const handleStoreOfficeExpense = (e: FormEvent) => {
+    e.preventDefault();
 
-      const payload = {
-        incurrence_date: incurrenceDate,
-        amount: amount,
-        description: description,
-      };
+    const payload = {
+      incurrence_date: incurrenceDate,
+      amount: amount,
+      description: description,
+    };
 
-      const { status, data } = await ExpenseService.storeOfficeExpense(payload);
+    executeStoreOfficeExpense({
+      apiService: () => OfficeExpenseService.storeOfficeExpense(payload),
 
-      if (status !== 200) {
-        console.error(
-          "Status error during store expense at AddExpenseFormModal.tsx: ",
-          status,
-        );
-        return;
-      }
+      onSuccess: (data) => {
+        showAlert({
+          variant: "success",
+          title: "Success",
+          message: data.message,
+        });
 
-      showAlert({
-        variant: "success",
-        title: "Added Success",
-        message: data.message,
-      });
+        setIncurrenceDate("");
+        setAmount("");
+        setDescription("");
+        setFieldErrors({});
 
-      setIncurrenceDate("");
-      setAmount("");
-      setDescription("");
-      setFieldErrors({});
-    } catch (error: any) {
-      if (error.response && error.response.status !== 422) {
-        console.error(
-          "Server error during store expense at AddExpenseFormModal.tsx: ",
-          error,
-        );
-        return;
-      }
+        refreshOfficeExpenses();
+      },
 
-      setFieldErrors(error.response.data.errors);
-    } finally {
-      setIsStoring(false);
-    }
+      onValidationError: (errors) => {
+        setFieldErrors(errors);
+      },
+    });
   };
 
   const handleAmountChange = (e: ChangeEvent<HTMLInputElement>) => {

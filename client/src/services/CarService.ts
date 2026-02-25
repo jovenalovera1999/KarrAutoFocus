@@ -33,7 +33,7 @@ const CarService = {
   },
   getCar: async (
     carId: string | number,
-    page: number,
+    page?: number,
     dateFrom?: string,
     dateTo?: string,
   ) => {

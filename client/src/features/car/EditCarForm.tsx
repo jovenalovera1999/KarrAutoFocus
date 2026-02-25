@@ -9,20 +9,29 @@ import Label from "@/components/ui/form/Label";
 import Select from "@/components/ui/form/Select";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { useAlert } from "@/context/AlertContext";
+import useApiMutation from "@/hooks/api/useApiMutation";
+import useApiQuery from "@/hooks/api/useApiQuery";
 import { useFormat } from "@/hooks/useFormat";
-import { CarFieldsErrors } from "@/interfaces/CarInterface";
+import { CarColumns, CarFieldsErrors } from "@/interfaces/CarInterface";
 import { CarStatusColumns } from "@/interfaces/CarStatusInterface";
 import { MakeColumns } from "@/interfaces/MakeInterface";
 import { TransmissionColumns } from "@/interfaces/TransmissionInterface";
+import { UnitExpenseColumns } from "@/interfaces/UnitExpenseInterface";
 import CarService from "@/services/CarService";
 import { useParams } from "next/navigation";
-import {
-  ChangeEvent,
-  FormEvent,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+
+interface CarReferences {
+  makes: MakeColumns[];
+  transmissions: TransmissionColumns[];
+  carStatus: CarStatusColumns[];
+}
+
+interface CarData {
+  car: CarColumns;
+  unitExpenses: UnitExpenseColumns[];
+  lastPage: number;
+}
 
 export default function EditCarForm() {
   const params = useParams();
@@ -31,13 +40,8 @@ export default function EditCarForm() {
   const { showAlert } = useAlert();
   const { handleCommaInNumbersOnTypingFormat } = useFormat();
 
-  const [isGetting, setIsGetting] = useState(true);
-  const [isReferencesLoading, setIsReferencesLoading] = useState(true);
-  const [makes, setMakes] = useState<MakeColumns[]>([]);
-  const [transmissions, setTransmissions] = useState<TransmissionColumns[]>([]);
-  const [carStatuss, setCarStatuss] = useState<CarStatusColumns[]>([]);
+  const { execute: executeUpdateCar, loading: isUpdating } = useApiMutation();
 
-  const [isUpdating, setIsUpdating] = useState(false);
   const [encodeDate, setEncodeDate] = useState("");
   const [yearModel, setYearModel] = useState("");
   const [make, setMake] = useState("");
@@ -65,155 +69,111 @@ export default function EditCarForm() {
   const [address, setAddress] = useState("");
   const [fieldErrors, setFieldErrors] = useState<CarFieldsErrors>({});
 
-  const handleLoadCarReferences = useCallback(async () => {
-    try {
-      const { status, data } = await CarService.loadCarReferences();
+  const {
+    data: carReferencesData,
+    loading: isLoadingCarReferences,
+    load: loadCarReferences,
+  } = useApiQuery<CarReferences>({
+    apiService: () => CarService.loadCarReferences(),
+  });
 
-      if (status !== 200) {
-        console.error(
-          "Status error during load car references at EditCarForm.tsx: ",
-          status,
-        );
-        return;
-      }
+  useEffect(() => {
+    loadCarReferences();
+  }, []);
 
-      setMakes(data.makes);
-      setTransmissions(data.transmissions);
-      setCarStatuss(data.carStatus);
-    } catch (error: any) {
-      console.error(
-        "Server error during load car references at EditCarForm.tsx: ",
-        error,
-      );
-    } finally {
-      setIsReferencesLoading(false);
-    }
+  const makes = carReferencesData?.makes ?? [];
+  const transmissions = carReferencesData?.transmissions ?? [];
+  const carStatuss = carReferencesData?.carStatus ?? [];
+
+  const {
+    data: carData,
+    loading: isLoadingCarData,
+    load: loadCarData,
+  } = useApiQuery<CarData>({
+    apiService: () => CarService.getCar(carId),
+  });
+
+  useEffect(() => {
+    loadCarData();
   }, []);
 
   useEffect(() => {
-    handleLoadCarReferences();
-  }, []);
+    if (!carData) return;
 
-  const handleGetCar = useCallback(
-    async (carId: string | number) => {
-      try {
-        const { status, data } = await CarService.getCar(carId);
-
-        if (status !== 200) {
-          console.error(
-            "Status error during get car at EditCarForm.tsx: ",
-            status,
-          );
-          return;
-        }
-
-        console.log(data);
-
-        setEncodeDate(data.car.encode_date);
-        setYearModel(data.car.year_model);
-        setMake(data.car.make.make_id);
-        setSeries(data.car.series);
-        setTransmission(data.car.transmission.transmission_id);
-        setColor(data.car.color.color);
-        setPrice(data.car.price);
-        setPlateNumber(data.car.plate_number);
-        setMotherFile(data.car.mother_file.mother_file);
-        setMvFileNumber(data.car.mv_file_number);
-        setEngineNumber(data.car.engine_number);
-        setChassisNumber(data.car.chassis_number);
-        setEngineCc(data.car.engine_cc.engine_cc);
-        setCarStatus(data.car.car_status.car_status_id);
-        setOriginalOrCrReceived(data.car.original_or_cr_received ?? "");
-        setEncumbered(data.car.encumbered.encumbered ?? "");
-        setRodReceived(data.car.rod_received ?? "");
-        setRodPaid(data.car.rod_paid ?? "");
-        setLastRegistered(data.car.last_registered ?? "");
-        setConfirmationRequest(data.car.confirmation_request ?? "");
-        setConfirmationReceived(data.car.confirmation_received ?? "");
-        setHpgClearance(data.car.hpg_clearance ?? "");
-        setTransferStatus(data.car.transfer_status.transfer_status);
-        setFirstOwner(data.car.first_owner);
-        setAddress(data.car.address);
-        setFieldErrors({});
-      } catch (error: any) {
-        console.error(
-          "Server error during get car at EditCarForm.tsx: ",
-          error,
-        );
-      } finally {
-        setIsGetting(false);
-      }
-    },
-    [carId],
-  );
-
-  useEffect(() => {
-    if (carId) {
-      handleGetCar(carId);
-    }
-  }, [carId]);
+    setEncodeDate(carData?.car.encode_date);
+    setYearModel(carData?.car.year_model);
+    setMake(carData?.car.make.make_id.toString());
+    setSeries(carData?.car.series);
+    setTransmission(carData?.car.transmission.transmission_id.toString());
+    setColor(carData?.car.color.color);
+    setPrice(carData?.car.price);
+    setPlateNumber(carData?.car.plate_number);
+    setMotherFile(carData?.car.mother_file.mother_file);
+    setMvFileNumber(carData?.car.mv_file_number);
+    setEngineNumber(carData?.car.engine_number);
+    setChassisNumber(carData?.car.chassis_number);
+    setEngineCc(carData?.car.engine_cc.engine_cc);
+    setCarStatus(carData?.car.car_status.car_status_id.toString());
+    setOriginalOrCrReceived(carData?.car.original_or_cr_received ?? "");
+    setEncumbered(carData?.car.encumbered?.encumbered ?? "");
+    setRodReceived(carData?.car.rod_received ?? "");
+    setRodPaid(carData?.car.rod_paid ?? "");
+    setLastRegistered(carData?.car.last_registered ?? "");
+    setConfirmationRequest(carData?.car.confirmation_request ?? "");
+    setConfirmationReceived(carData?.car.confirmation_received ?? "");
+    setHpgClearance(carData?.car.hpg_clearance ?? "");
+    setTransferStatus(carData?.car.transfer_status.transfer_status);
+    setFirstOwner(carData?.car.first_owner);
+    setAddress(carData?.car.address);
+    setFieldErrors({});
+  }, [carData]);
 
   const handleUpdateCar = async (e: FormEvent) => {
-    try {
-      e.preventDefault();
-      setIsUpdating(true);
+    e.preventDefault();
 
-      const payload = {
-        encode_date: encodeDate,
-        year_model: yearModel,
-        make: make,
-        series: series,
-        transmission: transmission,
-        color: color,
-        price: price,
-        plate_number: plateNumber,
-        mother_file: motherFile,
-        mv_file_number: mvFileNumber,
-        engine_number: engineNumber,
-        chassis_number: chassisNumber,
-        engine_cc: engineCc,
-        status: carStatus,
-        original_or_cr_received: originalOrCrReceived,
-        encumbered: encumbered,
-        rod_received: rodReceived,
-        rod_paid: rodPaid,
-        last_registered: lastRegistered,
-        confirmation_request: confirmationRequest,
-        confirmation_received: confirmationReceived,
-        hpg_clearance: hpgClearance,
-        transfer_status: transferStatus,
-        first_owner: firstOwner,
-        address: address,
-      };
+    const payload = {
+      encode_date: encodeDate,
+      year_model: yearModel,
+      make: make,
+      series: series,
+      transmission: transmission,
+      color: color,
+      price: price,
+      plate_number: plateNumber,
+      mother_file: motherFile,
+      mv_file_number: mvFileNumber,
+      engine_number: engineNumber,
+      chassis_number: chassisNumber,
+      engine_cc: engineCc,
+      status: carStatus,
+      original_or_cr_received: originalOrCrReceived,
+      encumbered: encumbered,
+      rod_received: rodReceived,
+      rod_paid: rodPaid,
+      last_registered: lastRegistered,
+      confirmation_request: confirmationRequest,
+      confirmation_received: confirmationReceived,
+      hpg_clearance: hpgClearance,
+      transfer_status: transferStatus,
+      first_owner: firstOwner,
+      address: address,
+    };
 
-      const { status, data } = await CarService.updateCar(carId, payload);
+    executeUpdateCar({
+      apiService: () => CarService.updateCar(carId, payload),
 
-      if (status !== 200) {
-        console.error(
-          "Status error during updating car at EditCarForm.tsx: ",
-          status,
-        );
-        return;
-      }
+      onSuccess: (data) => {
+        showAlert({
+          variant: "success",
+          title: "Update Success",
+          message: data.message,
+        });
+      },
 
-      showAlert({
-        variant: "success",
-        title: "Update Success",
-        message: data.message,
-      });
-    } catch (error: any) {
-      if (error.response && error.response.status !== 422) {
-        console.error(
-          "Server error during updating car at EditCarForm.tsx: ",
-          error,
-        );
-        return;
-      }
-
-      setFieldErrors(error.response.data.errors);
-    } finally {
-      setIsUpdating(false);
-    }
+      onValidationError: (errors) => {
+        setFieldErrors(errors);
+      },
+    });
   };
 
   const handlePriceChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -228,8 +188,8 @@ export default function EditCarForm() {
 
   return (
     <>
-      {isReferencesLoading &&
-        isGetting &&
+      {isLoadingCarReferences &&
+        isLoadingCarData &&
         !carId &&
         makes.length <= 0 &&
         transmissions.length <= 0 &&
@@ -239,8 +199,8 @@ export default function EditCarForm() {
           </div>
         )}
 
-      {!isReferencesLoading &&
-        !isGetting &&
+      {!isLoadingCarReferences &&
+        !isLoadingCarData &&
         carId &&
         makes.length > 0 &&
         transmissions.length > 0 &&

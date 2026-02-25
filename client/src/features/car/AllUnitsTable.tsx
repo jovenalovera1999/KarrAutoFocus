@@ -10,101 +10,43 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useFormat } from "@/hooks/useFormat";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { EyeIcon, PencilIcon, TrashBinIcon } from "@/icons/index";
+import { useEffect, useRef, useState } from "react";
+import { FileIcon, PencilIcon, TrashBinIcon } from "@/icons/index";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { useDebounce } from "@/hooks/useDebounce";
-import { CarColumns } from "@/interfaces/CarInterface";
-import CarService from "@/services/CarService";
 import Badge from "@/components/ui/badge/Badge";
 import Link from "next/link";
+import useApiInfiniteScrollQuery from "@/hooks/api/useApiInfiniteScrollQuery";
+import CarService from "@/services/CarService";
+import { CarColumns } from "@/interfaces/CarInterface";
 
 export default function AllUnitsTable() {
   const { handleNumberDecimalFormat, handleDateFormat } = useFormat();
 
-  const [isAllUnitsLoading, setIsAllUnitsLoading] = useState(false);
-  const [isMoreAllUnitsLoading, setIsMoreAllUnitsLoading] = useState(false);
-  const [allUnits, setAllUnits] = useState<CarColumns[]>([]);
-  const [lastPage, setLastPage] = useState<number | null>(null);
   const [search, setSearch] = useState("");
-
   const debouncedSearch = useDebounce(search);
 
   const tableRef = useRef<HTMLDivElement>(null);
-  const pageRef = useRef(1);
 
-  const handleLoadUsers = useCallback(
-    async (loadPage: number, searchValue: string) => {
-      try {
-        if (
-          (loadPage === 1 && isAllUnitsLoading) ||
-          (loadPage > 1 && isMoreAllUnitsLoading) ||
-          (lastPage !== null && loadPage > lastPage)
-        ) {
-          return;
-        }
+  const {
+    items: allUnits,
+    load: loadAllUnits,
+    handleScroll,
+    isLoading: isLoadingAllUnits,
+    isLoadingMore: isLoadingMoreAllUnits,
+    reset: resetAllUnitsTable,
+  } = useApiInfiniteScrollQuery<CarColumns>({
+    apiService: (page) => CarService.loadAllUnits(page, debouncedSearch),
+  });
 
-        loadPage === 1
-          ? setIsAllUnitsLoading(true)
-          : setIsMoreAllUnitsLoading(true);
-
-        const { status, data } = await CarService.loadAllUnits(
-          loadPage,
-          searchValue,
-        );
-
-        if (status !== 200) {
-          console.error(
-            "Status error during load cars all units at AllUnitsTable.tsx: ",
-            status,
-          );
-          return;
-        }
-
-        setAllUnits((prev) =>
-          loadPage === 1 ? data.cars : [...prev, ...data.cars],
-        );
-        setLastPage(data.lastPage);
-      } catch (error: any) {
-        console.error(
-          "Server error during load cars all units at AllUnitsTable.tsx: ",
-          error,
-        );
-      } finally {
-        loadPage === 1
-          ? setIsAllUnitsLoading(false)
-          : setIsMoreAllUnitsLoading(false);
-      }
-    },
-    [isAllUnitsLoading, isMoreAllUnitsLoading, lastPage],
-  );
+  const onScroll = () => {
+    handleScroll(tableRef.current);
+  };
 
   useEffect(() => {
-    pageRef.current = 1;
-    setLastPage(null);
-    setAllUnits([]);
-
-    handleLoadUsers(1, debouncedSearch);
+    resetAllUnitsTable();
+    loadAllUnits(1);
   }, [debouncedSearch]);
-
-  const handleScroll = useCallback(() => {
-    if (
-      !tableRef.current ||
-      isAllUnitsLoading ||
-      isMoreAllUnitsLoading ||
-      (lastPage && pageRef.current >= lastPage)
-    ) {
-      return;
-    }
-
-    const { scrollTop, scrollHeight, clientHeight } = tableRef.current;
-
-    if (scrollTop + clientHeight >= scrollHeight - 50) {
-      const nextPage = pageRef.current + 1;
-      pageRef.current = nextPage;
-      handleLoadUsers(nextPage, debouncedSearch);
-    }
-  }, [isAllUnitsLoading, isMoreAllUnitsLoading, lastPage, handleLoadUsers]);
 
   const headers = [
     "No.",
@@ -132,9 +74,9 @@ export default function AllUnitsTable() {
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
         <div
           ref={tableRef}
-          onScroll={handleScroll}
+          onScroll={onScroll}
           //   className={`relative sm:max-w-[calc(100vw-4rem)] ${isExpanded || isHovered ? "lg:max-w-[calc(100vw-24.5rem)]" : "lg:max-w-[calc(100vw-12rem)]"} max-h-[calc(100vh-18.5rem)] md:max-h-[calc(100vh-20.5rem)] overflow-x-auto overflow-y-auto`}
-          className="w-full max-h-[calc(100vh-20.5rem)] overflow-x-auto overflow-y-auto"
+          className="w-full max-h-[calc(100vh-18rem)] md:max-h-[calc(100vh-20.5rem)] overflow-x-auto overflow-y-auto"
         >
           <div className="w-full min-w-full">
             <Table>
@@ -155,7 +97,7 @@ export default function AllUnitsTable() {
 
               {/* Table Body */}
               <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
-                {isAllUnitsLoading && allUnits.length <= 0 && (
+                {isLoadingAllUnits && allUnits.length <= 0 && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"
@@ -193,7 +135,7 @@ export default function AllUnitsTable() {
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                       <Badge
                         size="sm"
-                        color={`${unit.car_status.car_status === "Available" ? "success" : unit.car_status.car_status === "Reserved" ? "warning" : "info"}`}
+                        color={`${unit.car_status.car_status.toLowerCase() === "available" ? "success" : unit.car_status.car_status.toLowerCase() === "reserved" ? "warning" : "info"}`}
                       >
                         {unit.car_status.car_status}
                       </Badge>
@@ -204,7 +146,7 @@ export default function AllUnitsTable() {
                           href={`/car/view/${unit.car_id}`}
                           className="text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400"
                         >
-                          <EyeIcon />
+                          <FileIcon />
                         </Link>
                         <Link
                           href={`/car/edit/${unit.car_id}`}
@@ -223,7 +165,7 @@ export default function AllUnitsTable() {
                   </TableRow>
                 ))}
 
-                {isMoreAllUnitsLoading && (
+                {isLoadingMoreAllUnits && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"
@@ -236,7 +178,7 @@ export default function AllUnitsTable() {
                   </TableRow>
                 )}
 
-                {!isAllUnitsLoading && allUnits.length <= 0 && (
+                {!isLoadingAllUnits && allUnits.length <= 0 && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"

@@ -17,6 +17,7 @@ export default function ExpensesPage() {
       <AddExpenseFormModal
         isOpen={isAddExpenseFormModalOpen}
         onClose={() => setIsAddExpenseFormModalOpen(false)}
+        refreshOfficeExpenses={handleRefresh}
       />
 
       <ComponentCard title="List of Expenses">

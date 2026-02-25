@@ -10,106 +10,42 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useFormat } from "@/hooks/useFormat";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { EyeIcon, FileIcon, PencilIcon, TrashBinIcon } from "@/icons/index";
+import { useEffect, useRef, useState } from "react";
+import { FileIcon, PencilIcon, TrashBinIcon } from "@/icons/index";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { useDebounce } from "@/hooks/useDebounce";
 import { CarColumns } from "@/interfaces/CarInterface";
 import CarService from "@/services/CarService";
 import Link from "next/link";
+import useApiInfiniteScrollQuery from "@/hooks/api/useApiInfiniteScrollQuery";
 
 export default function ReservedUnitsTable() {
   const { handleNumberDecimalFormat, handleDateFormat } = useFormat();
 
-  const [isReservedUnitsLoading, setIsReservedUnitsLoading] = useState(false);
-  const [isMoreReservedUnitsLoading, setIsMoreReservedUnitsLoading] =
-    useState(false);
-  const [reservedUnits, setReservedUnits] = useState<CarColumns[]>([]);
-  const [lastPage, setLastPage] = useState<number | null>(null);
   const [search, setSearch] = useState("");
-
   const debouncedSearch = useDebounce(search);
 
   const tableRef = useRef<HTMLDivElement>(null);
-  const pageRef = useRef(1);
 
-  const handleLoadUsers = useCallback(
-    async (loadPage: number, searchValue: string) => {
-      try {
-        if (
-          (loadPage === 1 && isReservedUnitsLoading) ||
-          (loadPage > 1 && isMoreReservedUnitsLoading) ||
-          (lastPage !== null && loadPage > lastPage)
-        ) {
-          return;
-        }
+  const {
+    items: reservedUnits,
+    load: loadReservedUnits,
+    handleScroll,
+    isLoading: isLoadingReservedUnits,
+    isLoadingMore: isLoadingMoreReservedUnits,
+    reset: resetReservedUnitsTable,
+  } = useApiInfiniteScrollQuery<CarColumns>({
+    apiService: (page) => CarService.loadReservedUnits(page, debouncedSearch),
+  });
 
-        loadPage === 1
-          ? setIsReservedUnitsLoading(true)
-          : setIsMoreReservedUnitsLoading(true);
-
-        const { status, data } = await CarService.loadReservedUnits(
-          loadPage,
-          searchValue,
-        );
-
-        if (status !== 200) {
-          console.error(
-            "Status error during load cars reserved units at ReservedUnitsTable.tsx: ",
-            status,
-          );
-          return;
-        }
-
-        setReservedUnits((prev) =>
-          loadPage === 1 ? data.cars : [...prev, ...data.cars],
-        );
-        setLastPage(data.lastPage);
-      } catch (error: any) {
-        console.error(
-          "Server error during load cars reserved units at ReservedUnitsTable.tsx: ",
-          error,
-        );
-      } finally {
-        loadPage === 1
-          ? setIsReservedUnitsLoading(false)
-          : setIsMoreReservedUnitsLoading(false);
-      }
-    },
-    [isReservedUnitsLoading, isMoreReservedUnitsLoading, lastPage],
-  );
+  const onScroll = () => {
+    handleScroll(tableRef.current);
+  };
 
   useEffect(() => {
-    pageRef.current = 1;
-    setLastPage(null);
-    setReservedUnits([]);
-
-    handleLoadUsers(1, debouncedSearch);
+    resetReservedUnitsTable();
+    loadReservedUnits(1);
   }, [debouncedSearch]);
-
-  const handleScroll = useCallback(() => {
-    if (
-      !tableRef.current ||
-      isReservedUnitsLoading ||
-      isMoreReservedUnitsLoading ||
-      (lastPage && pageRef.current >= lastPage)
-    ) {
-      return;
-    }
-
-    const { scrollTop, scrollHeight, clientHeight } = tableRef.current;
-
-    if (scrollTop + clientHeight >= scrollHeight - 50) {
-      const nextPage = pageRef.current + 1;
-      pageRef.current = nextPage;
-      handleLoadUsers(nextPage, debouncedSearch);
-    }
-  }, [
-    isReservedUnitsLoading,
-    isMoreReservedUnitsLoading,
-    lastPage,
-    handleLoadUsers,
-  ]);
 
   const headers = [
     "No.",
@@ -136,9 +72,9 @@ export default function ReservedUnitsTable() {
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
         <div
           ref={tableRef}
-          onScroll={handleScroll}
+          onScroll={onScroll}
           // className={`relative sm:max-w-[calc(100vw-4rem)] ${isExpanded || isHovered ? "lg:max-w-[calc(100vw-24.5rem)]" : "lg:max-w-[calc(100vw-12rem)]"} max-h-[calc(100vh-18.5rem)] md:max-h-[calc(100vh-20.5rem)] overflow-x-auto overflow-y-auto`}
-          className="w-full max-h-[calc(100vh-20.5rem)] overflow-x-auto overflow-y-auto"
+          className="w-full max-h-[calc(100vh-18rem)] md:max-h-[calc(100vh-20.5rem)] overflow-x-auto overflow-y-auto"
         >
           <div className="w-full min-w-full">
             <Table>
@@ -159,7 +95,7 @@ export default function ReservedUnitsTable() {
 
               {/* Table Body */}
               <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
-                {isReservedUnitsLoading && reservedUnits.length <= 0 && (
+                {isLoadingReservedUnits && reservedUnits.length <= 0 && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"
@@ -219,7 +155,7 @@ export default function ReservedUnitsTable() {
                   </TableRow>
                 ))}
 
-                {isMoreReservedUnitsLoading && (
+                {isLoadingMoreReservedUnits && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"
@@ -232,7 +168,7 @@ export default function ReservedUnitsTable() {
                   </TableRow>
                 )}
 
-                {!isReservedUnitsLoading && reservedUnits.length <= 0 && (
+                {!isLoadingReservedUnits && reservedUnits.length <= 0 && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"

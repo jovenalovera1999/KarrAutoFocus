@@ -14,7 +14,7 @@ import {
   TableIcon,
   UserCircleIcon,
 } from "../icons/index";
-import CompanyLogo from "@/img/ui/CompanyLogo.png";
+import KarrAutoFocus from "@/img/ui/KarrAutoFocusLogo.png";
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
@@ -263,31 +263,27 @@ const AppSidebar: React.FC = () => {
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div
-        className={`py-8 flex  ${
-          !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
-        }`}
-      >
+      <div className="py-8 flex justify-center">
         <Link href="/">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
               <Image
                 className="dark:hidden"
-                src={CompanyLogo}
+                src={KarrAutoFocus}
                 alt="Logo"
-                width={150}
-                height={40}
+                width={280}
+                height={180}
               />
               <Image
                 className="hidden dark:block"
-                src={CompanyLogo}
+                src={KarrAutoFocus}
                 alt="Logo"
-                width={150}
-                height={40}
+                width={280}
+                height={180}
               />
             </>
           ) : (
-            <Image src={CompanyLogo} alt="Logo" width={32} height={32} />
+            <Image src={KarrAutoFocus} alt="Logo" width={32} height={32} />
           )}
         </Link>
       </div>

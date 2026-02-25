@@ -17,93 +17,35 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { CarColumns } from "@/interfaces/CarInterface";
 import CarService from "@/services/CarService";
 import Link from "next/link";
+import useApiInfiniteScrollQuery from "@/hooks/api/useApiInfiniteScrollQuery";
 
 export default function SoldUnitsTable() {
   const { handleNumberDecimalFormat, handleDateFormat } = useFormat();
 
-  const [isSoldUnitsLoading, setIsSoldUnitsLoading] = useState(false);
-  const [isMoreSoldUnitsLoading, setIsMoreSoldUnitsLoading] = useState(false);
-  const [soldUnits, setSoldUnits] = useState<CarColumns[]>([]);
-  const [lastPage, setLastPage] = useState<number | null>(null);
   const [search, setSearch] = useState("");
-
   const debouncedSearch = useDebounce(search);
 
   const tableRef = useRef<HTMLDivElement>(null);
-  const pageRef = useRef(1);
 
-  const handleLoadUsers = useCallback(
-    async (loadPage: number, searchValue: string) => {
-      try {
-        if (
-          (loadPage === 1 && isSoldUnitsLoading) ||
-          (loadPage > 1 && isMoreSoldUnitsLoading) ||
-          (lastPage !== null && loadPage > lastPage)
-        ) {
-          return;
-        }
+  const {
+    items: soldUnits,
+    load: loadSoldUnits,
+    handleScroll,
+    isLoading: isLoadingSoldUnits,
+    isLoadingMore: isLoadingMoreSoldUnits,
+    reset: resetSoldUnitsTable,
+  } = useApiInfiniteScrollQuery<CarColumns>({
+    apiService: (page) => CarService.loadSoldUnits(page, debouncedSearch),
+  });
 
-        loadPage === 1
-          ? setIsSoldUnitsLoading(true)
-          : setIsMoreSoldUnitsLoading(true);
-
-        const { status, data } = await CarService.loadSoldUnits(
-          loadPage,
-          searchValue,
-        );
-
-        if (status !== 200) {
-          console.error(
-            "Status error during load cars sold units at SoldUnitsTable.tsx: ",
-            status,
-          );
-          return;
-        }
-
-        setSoldUnits((prev) =>
-          loadPage === 1 ? data.cars : [...prev, ...data.cars],
-        );
-        setLastPage(data.lastPage);
-      } catch (error: any) {
-        console.error(
-          "Server error during load cars sold units at SoldUnitsTable.tsx: ",
-          error,
-        );
-      } finally {
-        loadPage === 1
-          ? setIsSoldUnitsLoading(false)
-          : setIsMoreSoldUnitsLoading(false);
-      }
-    },
-    [isSoldUnitsLoading, isMoreSoldUnitsLoading, lastPage],
-  );
+  const onScroll = () => {
+    handleScroll(tableRef.current);
+  };
 
   useEffect(() => {
-    pageRef.current = 1;
-    setLastPage(null);
-    setSoldUnits([]);
-
-    handleLoadUsers(1, debouncedSearch);
+    resetSoldUnitsTable();
+    loadSoldUnits(1);
   }, [debouncedSearch]);
-
-  const handleScroll = useCallback(() => {
-    if (
-      !tableRef.current ||
-      isSoldUnitsLoading ||
-      isMoreSoldUnitsLoading ||
-      (lastPage && pageRef.current >= lastPage)
-    ) {
-      return;
-    }
-
-    const { scrollTop, scrollHeight, clientHeight } = tableRef.current;
-
-    if (scrollTop + clientHeight >= scrollHeight - 50) {
-      const nextPage = pageRef.current + 1;
-      pageRef.current = nextPage;
-      handleLoadUsers(nextPage, debouncedSearch);
-    }
-  }, [isSoldUnitsLoading, isMoreSoldUnitsLoading, lastPage, handleLoadUsers]);
 
   const headers = [
     "No.",
@@ -130,9 +72,9 @@ export default function SoldUnitsTable() {
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
         <div
           ref={tableRef}
-          onScroll={handleScroll}
+          onScroll={onScroll}
           // className={`relative sm:max-w-[calc(100vw-4rem)] ${isExpanded || isHovered ? "lg:max-w-[calc(100vw-24.5rem)]" : "lg:max-w-[calc(100vw-12rem)]"} max-h-[calc(100vh-18.5rem)] md:max-h-[calc(100vh-20.5rem)] overflow-x-auto overflow-y-auto`}
-          className="w-full max-h-[calc(100vh-20.5rem)] overflow-x-auto overflow-y-auto"
+          className="w-full max-h-[calc(100vh-18rem)] md:max-h-[calc(100vh-20.5rem)] overflow-x-auto overflow-y-auto"
         >
           <div className="w-full min-w-full">
             <Table>
@@ -153,7 +95,7 @@ export default function SoldUnitsTable() {
 
               {/* Table Body */}
               <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
-                {isSoldUnitsLoading && soldUnits.length <= 0 && (
+                {isLoadingSoldUnits && soldUnits.length <= 0 && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"
@@ -213,7 +155,7 @@ export default function SoldUnitsTable() {
                   </TableRow>
                 ))}
 
-                {isMoreSoldUnitsLoading && (
+                {isLoadingMoreSoldUnits && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"
@@ -226,7 +168,7 @@ export default function SoldUnitsTable() {
                   </TableRow>
                 )}
 
-                {!isSoldUnitsLoading && soldUnits.length <= 0 && (
+                {!isLoadingSoldUnits && soldUnits.length <= 0 && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"
