@@ -12,12 +12,15 @@ use App\Models\Make;
 use App\Models\MotherFile;
 use App\Models\TransferStatus;
 use App\Models\Transmission;
+use App\Traits\RestoreOrCreate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class CarController extends Controller
 {
+    use RestoreOrCreate;
+
     public function loadAllUnits(Request $request)
     {
         $page = $request->input('page', 1);
@@ -386,18 +389,6 @@ class CarController extends Controller
             'currentPage' => $unitExpenses->currentPage(),
             'lastPage' => $unitExpenses->lastPage(),
         ], 200);
-    }
-
-    private function restoreOrCreate($model, $column, $value) {
-        $instance = $model::withTrashed()->firstOrCreate([
-            $column => $value,
-        ]);
-
-        if($instance->trashed()) {
-            $instance->restore();
-        }
-
-        return $instance;
     }
 
     public function storeCar(Request $request)

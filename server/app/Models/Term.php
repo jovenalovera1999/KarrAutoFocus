@@ -17,7 +17,7 @@ class Term extends Model
         'term',
     ];
 
-    public function payment_details() {
-        return $this->hasMany(PaymentDetail::class, 'term_id', 'term_id');
+    public function payment_breakdowns() {
+        return $this->hasMany(PaymentBreakdown::class, 'term_id', 'term_id');
     }
 }

@@ -29,7 +29,7 @@ class Buyer extends Model
         return $this->hasMany(Car::class, 'buyer_id', 'buyer_id');
     }
 
-    public function payment_details() {
-        return $this->hasMany(PaymentDetail::class, 'buyer_id', 'buyer_id');
+    public function payment_breakdowns() {
+        return $this->hasMany(PaymentBreakdown::class, 'buyer_id', 'buyer_id');
     }
 }

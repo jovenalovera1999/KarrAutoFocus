@@ -43,5 +43,6 @@ Route::controller(UnitExpenseController::class)->prefix('/unit_expense')->group(
 });
 
 Route::controller(BuyerController::class)->prefix('/buyer')->group(function() {
-    Route::post('/storeBuyer/{car}', 'storeBuyer');
+    Route::post('/storeBuyer', 'storeBuyer');
+    Route::put('/updateBuyer/{buyer}', 'updateBuyer');
 });

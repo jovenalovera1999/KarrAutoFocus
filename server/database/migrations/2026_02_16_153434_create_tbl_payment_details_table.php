@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tbl_payment_details', function (Blueprint $table) {
-            $table->id('payment_detail_id');
+        Schema::create('tbl_payment_breakdowns', function (Blueprint $table) {
+            $table->id('payment_breakdown_id');
             $table->unsignedBigInteger('car_id');
             $table->unsignedBigInteger('buyer_id');
             $table->double('downpayment')->nullable()->default(0);
@@ -57,7 +57,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::disableForeignKeyConstraints();
-        Schema::dropIfExists('tbl_payment_details');
+        Schema::dropIfExists('tbl_payment_breakdowns');
         Schema::enableForeignKeyConstraints();
     }
 };

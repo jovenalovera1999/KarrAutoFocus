@@ -17,7 +17,7 @@ class Finance extends Model
         'finance',
     ];
 
-    public function payment_details() {
-        return $this->hasMany(PaymentDetail::class, 'finance_id', 'finance_id');
+    public function payment_breakdowns() {
+        return $this->hasMany(PaymentBreakdown::class, 'finance_id', 'finance_id');
     }
 }

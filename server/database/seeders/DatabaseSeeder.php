@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Agent;
 use App\Models\Branch;
+use App\Models\Buyer;
 use App\Models\Car;
 use App\Models\CarStatus;
 use App\Models\Color;
@@ -13,6 +15,7 @@ use App\Models\MotherFile;
 use App\Models\Role;
 use App\Models\TransferStatus;
 use App\Models\Transmission;
+use App\Models\UnitExpense;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -147,6 +150,12 @@ class DatabaseSeeder extends Seeder
             ['transfer_status' => 'Pending Caticlan'],
         ]);
 
-        Car::factory(100)->create();
+        Agent::factory(10)->create();
+
+        Buyer::factory(50)->create();
+
+        Car::factory(50)->create();
+
+        UnitExpense::factory(4500)->create();
     }
 }

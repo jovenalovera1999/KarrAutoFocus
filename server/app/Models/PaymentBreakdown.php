@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 
-class PaymentDetail extends Model
+class PaymentBreakdown extends Model
 {
     use HasFactory, Notifiable, SoftDeletes;
 
-    protected $table = 'tbl_payment_details';
-    protected $primaryKey = 'payment_detail_id';
+    protected $table = 'tbl_payment_breakdowns';
+    protected $primaryKey = 'payment_breakdown_id';
     protected $fillable = [
         'car_id',
         'buyer_id',
