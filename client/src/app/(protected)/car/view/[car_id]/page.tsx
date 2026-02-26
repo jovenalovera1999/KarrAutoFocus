@@ -4,7 +4,8 @@ import GoBackButton from "@/components/ui/button/GoBackButton";
 import Spinner from "@/components/ui/spinner/Spinner";
 import Tab from "@/components/ui/tab/Tab";
 import AddUnitExpenseFormModal from "@/features/car/AddUnitExpenseFormModal";
-import BuyerInformation from "@/features/car/BuyerInformation";
+import BuyerInformation from "@/features/car/BuyerInformationForm";
+import PaymentBreakdownForm from "@/features/car/PaymentBreakdownForm";
 import PaymentDetails from "@/features/car/PaymentDetails";
 import SummarOfExpenses from "@/features/car/SummaryOfExpenses";
 import ViewCar from "@/features/car/ViewCar";
@@ -200,7 +201,10 @@ export default function ViewCarPage() {
                 </Tab.Content>
 
                 <Tab.Content value="payment_details">
-                  <PaymentDetails carData={carData} />
+                  <div className="flex flex-col gap-4">
+                    <PaymentDetails carData={carData} />
+                    <PaymentBreakdownForm carData={carData} />
+                  </div>
                 </Tab.Content>
               </>
             )}

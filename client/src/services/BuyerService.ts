@@ -3,8 +3,14 @@ import api from "@/lib/api";
 const prefix = "/buyer";
 
 const BuyerService = {
-  storeBuyer: async (carId: string | number, data: any) => {
-    const res = await api.post(`${prefix}/storeBuyer/${carId}`, data);
+  storeBuyer: async (data: any, carId: string | number) => {
+    const res = await api.post(`${prefix}/storeBuyer`, data, {
+      params: { car_id: carId },
+    });
+    return res;
+  },
+  updateBuyer: async (buyerId: string | number, data: any) => {
+    const res = await api.put(`${prefix}/updateBuyer/${buyerId}`, data);
     return res;
   },
 };

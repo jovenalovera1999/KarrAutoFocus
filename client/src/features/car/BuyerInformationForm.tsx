@@ -5,23 +5,28 @@ import Input from "@/components/ui/form/Input";
 import Label from "@/components/ui/form/Label";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { useAlert } from "@/context/AlertContext";
+import useApiMutation from "@/hooks/api/useApiMutation";
 import { useFormat } from "@/hooks/useFormat";
-import { BuyerColumns, BuyerFieldsErrors } from "@/interfaces/BuyerInterface";
+import { BuyerFieldsErrors } from "@/interfaces/BuyerInterface";
 import { CarColumns } from "@/interfaces/CarInterface";
 import BuyerService from "@/services/BuyerService";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 
-interface BuyerInformationProps {
+interface BuyerInformationFormProps {
   carData: CarColumns | null;
 }
 
-export default function BuyerInformation({ carData }: BuyerInformationProps) {
+export default function BuyerInformationForm({
+  carData,
+}: BuyerInformationFormProps) {
   const { showAlert } = useAlert();
   const { handleCommaInNumbersOnTypingFormat } = useFormat();
 
-  const [isStoring, setIsStoring] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
+  const { execute: executeStoreBuyer, loading: isStoring } = useApiMutation();
+  const { execute: executeUpdateBuyer, loading: isUpdating } = useApiMutation();
+
   const [carId, setCarId] = useState(0);
+  const [buyerId, setBuyerId] = useState(0);
   const [buyer, setBuyer] = useState("");
   const [address, setAddress] = useState("");
   const [agreedPrice, setAgreedPrice] = useState("");
@@ -29,55 +34,69 @@ export default function BuyerInformation({ carData }: BuyerInformationProps) {
   const [agent, setAgent] = useState("");
   const [fieldErrors, setFieldErrors] = useState<BuyerFieldsErrors>({});
 
-  const handleStoreBuyer = async (e: FormEvent) => {
-    try {
-      e.preventDefault();
-      setIsStoring(true);
+  const handleStoreBuyer = (e: FormEvent) => {
+    e.preventDefault();
 
-      const payload = {
-        buyer: buyer,
-        address: address,
-        agreed_price: agreedPrice,
-        date_reserved: dateReserved,
-        agent: agent,
-      };
+    const payload = {
+      buyer: buyer,
+      address: address,
+      agreed_price: agreedPrice,
+      date_reserved: dateReserved,
+      agent: agent,
+    };
 
-      const { status, data } = await BuyerService.storeBuyer(carId, payload);
+    executeStoreBuyer({
+      apiService: () => BuyerService.storeBuyer(payload, carId),
 
-      if (status !== 200) {
-        console.error(
-          "Status error during store buyer at BuyerInformation.tsx: ",
-          status,
-        );
-        return;
-      }
+      onSuccess: (data) => {
+        showAlert({
+          variant: "success",
+          title: "Save Success",
+          message: data.message,
+        });
 
-      showAlert({
-        variant: "success",
-        title: "Saved Success",
-        message: data.message,
-      });
+        setFieldErrors({});
+      },
 
-      setFieldErrors({});
-    } catch (error: any) {
-      if (error.response && error.response.status !== 422) {
-        console.error(
-          "Server error during store buyer at BuyerInformation.tsx: ",
-          error,
-        );
-        return;
-      }
+      onValidationError: (errors) => {
+        setFieldErrors(errors);
+      },
+    });
+  };
 
-      setFieldErrors(error.response.data.errors);
-    } finally {
-      setIsStoring(false);
-    }
+  const handleUpdateBuyer = (e: FormEvent) => {
+    e.preventDefault();
+
+    const payload = {
+      buyer: buyer,
+      address: address,
+      agreed_price: agreedPrice,
+      date_reserved: dateReserved,
+      agent: agent,
+    };
+
+    executeUpdateBuyer({
+      apiService: () => BuyerService.updateBuyer(buyerId, payload),
+
+      onSuccess: (data) => {
+        showAlert({
+          variant: "success",
+          title: "Update Success",
+          message: data.message,
+        });
+      },
+
+      onValidationError: (errors) => {
+        setFieldErrors(errors);
+      },
+    });
   };
 
   useEffect(() => {
     setCarId(carData?.car_id ?? 0);
 
     if (carData?.buyer) {
+      setBuyerId(carData.buyer.buyer_id);
       setBuyer(carData?.buyer.buyer);
       setAddress(carData?.buyer.address);
       setAgreedPrice(carData?.buyer.agreed_price ?? "");
@@ -88,6 +107,7 @@ export default function BuyerInformation({ carData }: BuyerInformationProps) {
 
   useEffect(() => {
     if (!carData?.buyer) {
+      setBuyerId(0);
       setBuyer("");
       setAddress("");
       setAgreedPrice("");
@@ -109,7 +129,7 @@ export default function BuyerInformation({ carData }: BuyerInformationProps) {
   return (
     <>
       <ComponentCard title="Buyer Information">
-        <Form onSubmit={handleStoreBuyer}>
+        <Form onSubmit={buyerId ? handleUpdateBuyer : handleStoreBuyer}>
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div className="col-span-2 md:col-span-1">
               <div className="mb-4">
@@ -175,11 +195,17 @@ export default function BuyerInformation({ carData }: BuyerInformationProps) {
                 <>
                   <div className="flex gap-2">
                     <Spinner size="xs" />
-                    Saving Buyer Information...
+                    {buyerId
+                      ? "Updating Buyer Information"
+                      : "Saving Buyer Information"}
                   </div>
                 </>
               ) : (
-                "Save Buyer Information"
+                <>
+                  {buyerId
+                    ? "Update Buyer Information"
+                    : "Save Buyer Information"}
+                </>
               )}
             </Button>
           </div>
