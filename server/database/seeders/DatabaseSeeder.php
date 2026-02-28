@@ -154,7 +154,7 @@ class DatabaseSeeder extends Seeder
 
         Buyer::factory(50)->create();
 
-        Car::factory(50)->create();
+        Car::factory(100)->create();
 
         UnitExpense::factory(4500)->create();
     }

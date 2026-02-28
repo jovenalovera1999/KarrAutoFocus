@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('tbl_payments', function (Blueprint $table) {
             $table->id('payment_id');
-            $table->unsignedBigInteger('payment_detail_id');
+            $table->unsignedBigInteger('payment_breakdown_id');
             $table->unsignedBigInteger('payment_method_id');
             $table->date('payment_date');
             $table->double('amount')->default(0);
@@ -21,9 +21,9 @@ return new class extends Migration
             $table->softDeletes();
             $table->timestamps();
 
-            $table->foreign('payment_detail_id')
-                ->references('payment_detail_id')
-                ->on('tbl_payment_details')
+            $table->foreign('payment_breakdown_id')
+                ->references('payment_breakdown_id')
+                ->on('tbl_payment_breakdowns')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 

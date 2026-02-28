@@ -36,22 +36,36 @@ export const useFormat = () => {
     }).format(newDateTime);
   };
 
-  const handleCommaInNumbersOnTypingFormat = (value: string) => {
-    if (!value) {
-      return "";
+  const handleCommaInNumbersOnTypingFormat = (
+    value?: string | number | null,
+  ): string => {
+    if (value === null || value === undefined) return "";
+
+    // Force string
+    const stringValue = String(value);
+
+    if (stringValue.trim() === "") return "";
+
+    // Remove existing commas safely
+    const cleaned = stringValue.replace(/,/g, "");
+
+    // If it's just ".", allow it while typing
+    if (cleaned === ".") return "0.";
+
+    const parts = cleaned.split(".");
+    const integerPart = parts[0] ?? "";
+    const decimalPart = parts[1];
+
+    // Prevent NaN formatting
+    if (integerPart === "" || isNaN(Number(integerPart))) {
+      return cleaned;
     }
 
-    const [integerPart, decimalPart] = value.split(".");
+    const formattedInteger = Number(integerPart).toLocaleString("en-US");
 
-    const formattedInteger = Number(
-      integerPart.replace(/,/g, ""),
-    ).toLocaleString("en-US");
-
-    if (decimalPart !== undefined) {
-      return `${formattedInteger}.${decimalPart}`;
-    }
-
-    return formattedInteger;
+    return decimalPart !== undefined
+      ? `${formattedInteger}.${decimalPart}`
+      : formattedInteger;
   };
 
   const handleNumberDecimalFormat = (number: string | number) => {

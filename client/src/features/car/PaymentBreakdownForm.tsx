@@ -3,10 +3,13 @@ import Button from "@/components/ui/button/Button";
 import Form from "@/components/ui/form/Form";
 import Input from "@/components/ui/form/Input";
 import Label from "@/components/ui/form/Label";
+import { useAlert } from "@/context/AlertContext";
 import useApiMutation from "@/hooks/api/useApiMutation";
 import { useFormat } from "@/hooks/useFormat";
 import { CarColumns } from "@/interfaces/CarInterface";
-import { ChangeEvent, useState } from "react";
+import { PaymentBreakdownFieldsErrors } from "@/interfaces/PaymentBreakdownInterface";
+import PaymentBreakdownService from "@/services/PaymentBreakdownService";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 
 interface PaymentBreakdownFormProps {
   carData: CarColumns | null;
@@ -15,14 +18,18 @@ interface PaymentBreakdownFormProps {
 export default function PaymentBreakdownForm({
   carData,
 }: PaymentBreakdownFormProps) {
+  const { showAlert } = useAlert();
   const { handleCommaInNumbersOnTypingFormat, handleNumberDecimalFormat } =
     useFormat();
 
-  const { execute: storePaymentBreakdown, loading: isStoring } =
+  const { execute: executeStorePaymentBreakdown, loading: isStoring } =
     useApiMutation();
-  const { execute: updatePaymentBreakdown, loading: isUpdating } =
+  const { execute: executeUpdatePaymentBreakdown, loading: isUpdating } =
     useApiMutation();
 
+  const [carId, setCarId] = useState(0);
+  const [buyerId, setBuyerId] = useState(0);
+  const [paymentBreakdownId, setPaymentBreakdownId] = useState(0);
   const [downpayment, setDownpayment] = useState("");
   const [processingFee, setProcessingFee] = useState("");
   const [serviceFee, setServiceFee] = useState("");
@@ -30,6 +37,77 @@ export default function PaymentBreakdownForm({
   const [finance, setFinance] = useState("");
   const [loanAmount, setLoanAmount] = useState("");
   const [term, setTerm] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<PaymentBreakdownFieldsErrors>(
+    {},
+  );
+
+  const handleStorePaymentBreakdown = (e: FormEvent) => {
+    e.preventDefault();
+
+    const payload = {
+      car: carId,
+      buyer: buyerId,
+      downpayment: downpayment,
+      processing_fee: processingFee,
+      service_fee: serviceFee,
+      transfer: transfer,
+      finance: finance,
+      term: term,
+    };
+
+    executeStorePaymentBreakdown({
+      apiService: () => PaymentBreakdownService.storePaymentBreakdown(payload),
+
+      onSuccess: (data) => {
+        showAlert({
+          variant: "success",
+          title: "Save Success",
+          message: data.message,
+        });
+
+        setFieldErrors({});
+      },
+
+      onValidationError: (errors) => {
+        setFieldErrors(errors);
+      },
+    });
+  };
+
+  const handleUpdatePaymentBreakdown = (e: FormEvent) => {
+    e.preventDefault();
+
+    const payload = {
+      downpayment: downpayment,
+      processing_fee: processingFee,
+      service_fee: serviceFee,
+      transfer: transfer,
+      finance: finance,
+      term: term,
+    };
+
+    executeUpdatePaymentBreakdown({
+      apiService: () =>
+        PaymentBreakdownService.updatePaymentBreakdown(
+          paymentBreakdownId,
+          payload,
+        ),
+
+      onSuccess: (data) => {
+        showAlert({
+          variant: "success",
+          title: "Update Success",
+          message: data.message,
+        });
+
+        setFieldErrors({});
+      },
+
+      onValidationError: (errors) => {
+        setFieldErrors(errors);
+      },
+    });
+  };
 
   const handleDownpaymentChange = (e: ChangeEvent<HTMLInputElement>) => {
     let rawValue = e.target.value.replace(/,/g, "");
@@ -41,10 +119,78 @@ export default function PaymentBreakdownForm({
     setDownpayment(rawValue);
   };
 
+  const handleProcessingFeeChange = (e: ChangeEvent<HTMLInputElement>) => {
+    let rawValue = e.target.value.replace(/,/g, "");
+
+    if (!/^\d*\.?\d*$/.test(rawValue)) {
+      return;
+    }
+
+    setProcessingFee(rawValue);
+  };
+
+  const handleServiceFeeChange = (e: ChangeEvent<HTMLInputElement>) => {
+    let rawValue = e.target.value.replace(/,/g, "");
+
+    if (!/^\d*\.?\d*$/.test(rawValue)) {
+      return;
+    }
+
+    setServiceFee(rawValue);
+  };
+
+  const handleTransferChange = (e: ChangeEvent<HTMLInputElement>) => {
+    let rawValue = e.target.value.replace(/,/g, "");
+
+    if (!/^\d*\.?\d*$/.test(rawValue)) {
+      return;
+    }
+
+    setTransfer(rawValue);
+  };
+
+  useEffect(() => {
+    setCarId(carData?.car_id ?? 0);
+    setBuyerId(carData?.buyer?.buyer_id ?? 0);
+    setPaymentBreakdownId(
+      carData?.payment_breakdown?.payment_breakdown_id ?? 0,
+    );
+  }, [carData, carData?.buyer, carData?.payment_breakdown]);
+
+  useEffect(() => {
+    if (carData?.payment_breakdown) {
+      const paymentBreakdown = carData.payment_breakdown;
+
+      setDownpayment(paymentBreakdown.downpayment ?? "");
+      setProcessingFee(paymentBreakdown.processing_fee ?? "");
+      setServiceFee(paymentBreakdown.service_fee ?? "");
+      setTransfer(paymentBreakdown.transfer ?? "");
+      setFinance(paymentBreakdown.finance.finance ?? "");
+      setTerm(paymentBreakdown.term.term ?? "");
+    }
+  }, [carData?.payment_breakdown]);
+
+  useEffect(() => {
+    if (!carData?.payment_breakdown) {
+      setDownpayment("");
+      setProcessingFee("");
+      setServiceFee("");
+      setTransfer("");
+      setFinance("");
+      setTerm("");
+    }
+  }, [carData?.payment_breakdown]);
+
   return (
     <>
-      <ComponentCard title="Buyer Information">
-        <Form>
+      <ComponentCard title="Payment Breakdown">
+        <Form
+          onSubmit={
+            paymentBreakdownId
+              ? handleUpdatePaymentBreakdown
+              : handleStorePaymentBreakdown
+          }
+        >
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div className="col-span-2 md:col-span-1">
               <div className="mb-4">
@@ -54,7 +200,7 @@ export default function PaymentBreakdownForm({
                   name="downpayment"
                   value={handleCommaInNumbersOnTypingFormat(downpayment)}
                   onChange={handleDownpaymentChange}
-                  autoFocus
+                  errors={fieldErrors.downpayment}
                 />
               </div>
               <div className="mb-4">
@@ -62,8 +208,9 @@ export default function PaymentBreakdownForm({
                 <Input
                   type="text"
                   name="processing_fee"
-                  value={processingFee}
-                  onChange={(e) => setProcessingFee(e.target.value)}
+                  value={handleCommaInNumbersOnTypingFormat(processingFee)}
+                  onChange={handleProcessingFeeChange}
+                  errors={fieldErrors.processing_fee}
                 />
               </div>
               <div className="mb-4">
@@ -71,8 +218,9 @@ export default function PaymentBreakdownForm({
                 <Input
                   type="text"
                   name="service_fee"
-                  value={serviceFee}
-                  onChange={(e) => setServiceFee(e.target.value)}
+                  value={handleCommaInNumbersOnTypingFormat(serviceFee)}
+                  onChange={handleServiceFeeChange}
+                  errors={fieldErrors.service_fee}
                 />
               </div>
               <div>
@@ -80,19 +228,21 @@ export default function PaymentBreakdownForm({
                 <Input
                   type="text"
                   name="transfer"
-                  value={transfer}
-                  onChange={(e) => setTransfer(e.target.value)}
+                  value={handleCommaInNumbersOnTypingFormat(transfer)}
+                  onChange={handleTransferChange}
+                  errors={fieldErrors.transfer}
                 />
               </div>
             </div>
             <div className="col-span-2 md:col-span-1">
               <div className="mb-4">
-                <Label>Finance</Label>
+                <Label required>Finance</Label>
                 <Input
                   type="text"
                   name="finance"
                   value={finance}
                   onChange={(e) => setFinance(e.target.value)}
+                  errors={fieldErrors.finance}
                 />
               </div>
               <div className="mb-4">
@@ -115,13 +265,24 @@ export default function PaymentBreakdownForm({
                   name="term"
                   value={term}
                   onChange={(e) => setTerm(e.target.value)}
+                  errors={fieldErrors.term}
                 />
               </div>
             </div>
           </div>
           <div className="flex items-center justify-center">
-            <Button type="submit" className="w-full">
-              Save Payment Breakdown
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isStoring || isUpdating}
+            >
+              {paymentBreakdownId
+                ? isUpdating
+                  ? "Updating Payment Breakdown..."
+                  : "Update Payment Breakdown"
+                : isStoring
+                  ? "Saving Payment Breakdown..."
+                  : "Save Payment Breakdown"}
             </Button>
           </div>
         </Form>

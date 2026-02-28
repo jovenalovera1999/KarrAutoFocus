@@ -21,7 +21,6 @@ class PaymentBreakdown extends Model
         'service_fee',
         'transfer',
         'finance_id',
-        'loan_amount',
         'term_id',
     ];
 

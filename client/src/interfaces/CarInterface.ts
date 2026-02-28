@@ -5,6 +5,7 @@ import { EncumberedColumns } from "./EncumberedInterface";
 import { EngineCcColumns } from "./EngineCcInterface";
 import { MakeColumns } from "./MakeInterface";
 import { MotherFileColumns } from "./MotherFileInterface";
+import { PaymentBreakdownColumns } from "./PaymentBreakdownInterface";
 import { TransferStatusColumns } from "./TransferStatusInterface";
 import { TransmissionColumns } from "./TransmissionInterface";
 
@@ -36,6 +37,7 @@ export interface CarColumns {
   first_owner: string;
   address: string;
   buyer?: BuyerColumns;
+  payment_breakdown?: PaymentBreakdownColumns;
   created_at: string;
   updated_at: string;
 }

@@ -20,7 +20,6 @@ return new class extends Migration
             $table->double('service_fee')->nullable()->default(0);
             $table->double('transfer')->nullable()->default(0);
             $table->unsignedBigInteger('finance_id');
-            $table->double('loan_amount')->nullable()->default(0);
             $table->unsignedBigInteger('term_id');
             $table->softDeletes();
             $table->timestamps();

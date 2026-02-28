@@ -78,11 +78,12 @@ class Car extends Model
         return $this->belongsTo(Buyer::class, 'buyer_id', 'buyer_id')->withTrashed();
     }
 
+    public function payment_breakdown() {
+        return $this->hasOne(PaymentBreakdown::class, 'car_id', 'car_id');
+    }
+
     public function unit_expenses() {
         return $this->hasMany(UnitExpense::class, 'car_id', 'car_id');
     }
 
-    public function payment_breakdowns() {
-        return $this->hasMany(PaymentBreakdown::class, 'car_id', 'car_id');
-    }
 }

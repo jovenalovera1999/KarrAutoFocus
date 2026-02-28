@@ -370,6 +370,8 @@ class CarController extends Controller
             'encumbered',
             'transfer_status',
             'buyer.agent',
+            'payment_breakdown.finance',
+            'payment_breakdown.term',
         ]);
 
         $unitExpenses = $car->unit_expenses();
