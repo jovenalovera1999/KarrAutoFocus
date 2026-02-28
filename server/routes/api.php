@@ -2,9 +2,10 @@
 
 use App\Http\Controllers\Api\BuyerController;
 use App\Http\Controllers\Api\CarController;
-use App\Http\Controllers\Api\ExpenseController;
 use App\Http\Controllers\Api\OfficeExpenseController;
 use App\Http\Controllers\Api\PaymentBreakdownController;
+use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\UnitExpenseController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
@@ -51,4 +52,12 @@ Route::controller(BuyerController::class)->prefix('/buyer')->group(function() {
 Route::controller(PaymentBreakdownController::class)->prefix('/payment_breakdown')->group(function() {
     Route::post('/storePaymentBreakdown', 'storePaymentBreakdown');
     Route::put('/updatePaymentBreakdown/{paymentBreakdown}', 'updatePaymentBreakdown');
+});
+
+Route::controller(PaymentMethodController::class)->prefix('/payment_method')->group(function() {
+    Route::get('/loadPaymentMethods', 'loadPaymentMethods');
+});
+
+Route::controller(PaymentController::class)->prefix('/payment')->group(function() {
+    Route::post('/storePayment', 'storePayment');
 });

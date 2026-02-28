@@ -10,6 +10,7 @@ use App\Models\Encumbered;
 use App\Models\EngineCc;
 use App\Models\Make;
 use App\Models\MotherFile;
+use App\Models\Payment;
 use App\Models\TransferStatus;
 use App\Models\Transmission;
 use App\Traits\RestoreOrCreate;
@@ -385,11 +386,36 @@ class CarController extends Controller
         $unitExpenses = $unitExpenses->orderBy('created_at', 'desc')
             ->paginate(25, ['*'], 'page', $page);
 
+        $payments = Payment::query()
+            ->when($car->car_id, fn ($q) =>
+                $q->where('car_id', $car->car_id)
+            )
+            ->when($car->buyer_id, fn ($q) =>
+                $q->where('buyer_id', $car->buyer_id)
+            )
+            ->when($car->payment_breakdown, fn ($q) =>
+                $q->where(
+                    'payment_breakdown_id',
+                    $car->payment_breakdown->payment_breakdown_id
+                )
+            )
+            ->with([
+                'car',
+                'buyer',
+                'payment_breakdown.finance',
+                'payment_breakdown.term',
+                'payment_method',
+            ])
+            ->orderByDesc('created_at')
+            ->get();
+
+
         return response()->json([
             'car' => $car,
-            'unitExpenses' => $unitExpenses->items(),
-            'currentPage' => $unitExpenses->currentPage(),
-            'lastPage' => $unitExpenses->lastPage(),
+            'unitExpenses' => $unitExpenses->items(), // Unit expenses
+            'currentPage' => $unitExpenses->currentPage(), // Unit expenses
+            'lastPage' => $unitExpenses->lastPage(), // Unit expenses
+            'payments' => $payments,
         ], 200);
     }
 

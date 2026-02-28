@@ -3,15 +3,19 @@
 import GoBackButton from "@/components/ui/button/GoBackButton";
 import Spinner from "@/components/ui/spinner/Spinner";
 import Tab from "@/components/ui/tab/Tab";
+import AddPaymentFormModal from "@/features/car/AddPaymentFormModal";
 import AddUnitExpenseFormModal from "@/features/car/AddUnitExpenseFormModal";
 import BuyerInformation from "@/features/car/BuyerInformationForm";
 import PaymentBreakdownForm from "@/features/car/PaymentBreakdownForm";
 import PaymentDetails from "@/features/car/PaymentDetails";
+import PaymentsTable from "@/features/car/PaymentsTable";
 import SummarOfExpenses from "@/features/car/SummaryOfExpenses";
 import ViewCar from "@/features/car/ViewCar";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useRefresh } from "@/hooks/useRefresh";
 import { CarColumns } from "@/interfaces/CarInterface";
+import { PaymentBreakdownColumns } from "@/interfaces/PaymentBreakdownInterface";
+import { PaymentColumns } from "@/interfaces/PaymentInterface";
 import { UnitExpenseColumns } from "@/interfaces/UnitExpenseInterface";
 import CarService from "@/services/CarService";
 import { useParams } from "next/navigation";
@@ -23,30 +27,11 @@ export default function ViewCarPage() {
 
   const { refresh, handleRefresh } = useRefresh();
 
-  const [selectedCarId, setSelectedCarId] = useState<string | number | null>(
-    "",
-  );
-
-  const [isAddUnitExpenseFormModalOpen, setIsAddUnitExpenseFormModalOpen] =
-    useState(false);
-
-  const handleOpenAddUnitExpenseFormModal = (
-    carIdSelected: string | number | null,
-  ) => {
-    setSelectedCarId(carIdSelected);
-    setIsAddUnitExpenseFormModalOpen(true);
-  };
-
-  const handleCloseAddUnitExpenseFormModal = () => {
-    setSelectedCarId("");
-    setIsAddUnitExpenseFormModalOpen(false);
-  };
-
   // ============================
   // SHARED STATES
   // ============================
 
-  const [isLoadingCarData, setIsLoadingCarData] = useState(true);
+  const [isCarDataLoading, setIsCarDataLoading] = useState(true);
 
   const [carData, setCarData] = useState<CarColumns | null>(null);
 
@@ -64,6 +49,53 @@ export default function ViewCarPage() {
   const debouncedDateTo = useDebounce(dateTo);
 
   const pageRef = useRef(1);
+
+  // States for table payments
+  const [payments, setPayments] = useState<PaymentColumns[]>([]);
+  const [isPaymentsLoading, setIsPaymentsLoading] = useState(false);
+
+  // ============================
+  // STATES AND FUNCTIONS FOR MODAL
+  // ============================
+
+  const [selectedCarId, setSelectedCarId] = useState<string | number | null>(
+    "",
+  );
+  const [selectedPaymentBreakdown, setSelectedPaymentBreakdown] = useState<
+    PaymentBreakdownColumns | null | undefined
+  >(null);
+
+  // Unit expense states and functionality
+  const [isAddUnitExpenseFormModalOpen, setIsAddUnitExpenseFormModalOpen] =
+    useState(false);
+
+  const handleOpenAddUnitExpenseFormModal = (
+    carIdSelected: string | number | null,
+  ) => {
+    setSelectedCarId(carIdSelected);
+    setIsAddUnitExpenseFormModalOpen(true);
+  };
+
+  const handleCloseAddUnitExpenseFormModal = () => {
+    setSelectedCarId("");
+    setIsAddUnitExpenseFormModalOpen(false);
+  };
+
+  // Payment states and functionality
+  const [isAddPaymentFormModalOpen, setIsAddPaymentFormModalOpen] =
+    useState(false);
+
+  const handleOpenAddPaymentFormModal = (
+    paymentBreakdownSelected: PaymentBreakdownColumns | null | undefined,
+  ) => {
+    setSelectedPaymentBreakdown(paymentBreakdownSelected);
+    setIsAddPaymentFormModalOpen(true);
+  };
+
+  const handleCloseAddPaymentFormModal = () => {
+    setSelectedPaymentBreakdown(null);
+    setIsAddPaymentFormModalOpen(false);
+  };
 
   // ============================
   // SINGLE API FUNCTION
@@ -86,6 +118,8 @@ export default function ViewCarPage() {
           ? setIsUnitExpensesLoading(true)
           : setIsMoreUnitExpensesLoading(true);
 
+        setIsPaymentsLoading(true);
+
         const { status, data } = await CarService.getCar(
           carId,
           loadPage,
@@ -103,21 +137,27 @@ export default function ViewCarPage() {
 
         setCarData(data.car);
 
+        // Summary of unit expenses
         setUnitExpenses((prev) =>
           loadPage === 1 ? data.unitExpenses : [...prev, ...data.unitExpenses],
         );
-
         setLastPage(data.lastPage);
+
+        // Payments
+        setPayments(data.payments);
       } catch (error) {
         console.error(
           "Status error during get car data at CarViewPage.tsx: ",
           error,
         );
       } finally {
-        setIsLoadingCarData(false);
+        setIsCarDataLoading(false);
+
         loadPage === 1
           ? setIsUnitExpensesLoading(false)
           : setIsMoreUnitExpensesLoading(false);
+
+        setIsPaymentsLoading(false);
       }
     },
     [carId, isUnitExpensesLoading, isMoreUnitExpensesLoading, lastPage],
@@ -135,19 +175,28 @@ export default function ViewCarPage() {
 
   return (
     <>
-      {isLoadingCarData && !carId && (
+      {isCarDataLoading && !carId && (
         <div className="flex items-center justify-center min-h-screen">
           <Spinner size="xl" />
         </div>
       )}
 
-      {!isLoadingCarData && carId && (
+      {!isCarDataLoading && carId && (
         <>
           <AddUnitExpenseFormModal
             selectedCarId={selectedCarId}
             isOpen={isAddUnitExpenseFormModalOpen}
             onClose={handleCloseAddUnitExpenseFormModal}
             refreshUnitExpenses={handleRefresh}
+          />
+
+          <AddPaymentFormModal
+            carData={carData}
+            buyerData={carData?.buyer}
+            paymentBreakdownData={selectedPaymentBreakdown}
+            isOpen={isAddPaymentFormModalOpen}
+            onClose={handleCloseAddPaymentFormModal}
+            refreshPayments={handleRefresh}
           />
 
           <GoBackButton />
@@ -172,7 +221,7 @@ export default function ViewCarPage() {
             </Tab.List>
 
             <Tab.Content value="car_information">
-              <ViewCar carData={carData} isLoadingCarData={isLoadingCarData} />
+              <ViewCar carData={carData} isCarDataLoading={isCarDataLoading} />
             </Tab.Content>
 
             <Tab.Content value="summary_of_expenses">
@@ -204,6 +253,12 @@ export default function ViewCarPage() {
                   <div className="flex flex-col gap-4">
                     <PaymentDetails carData={carData} />
                     <PaymentBreakdownForm carData={carData} />
+                    <PaymentsTable
+                      carData={carData}
+                      payments={payments}
+                      isPaymentsLoading={isPaymentsLoading}
+                      onAddPayment={handleOpenAddPaymentFormModal}
+                    />
                   </div>
                 </Tab.Content>
               </>

@@ -41,6 +41,6 @@ class PaymentBreakdown extends Model
     }
 
     public function payments() {
-        return $this->hasMany(Payment::class, 'payment_detail_id', 'payment_detail_id');
+        return $this->hasMany(Payment::class, 'payment_breakdown_id', 'payment_breakdown_id');
     }
 }

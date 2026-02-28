@@ -13,7 +13,6 @@ import {
 import { useFormat } from "@/hooks/useFormat";
 import { CarColumns } from "@/interfaces/CarInterface";
 import { UnitExpenseColumns } from "@/interfaces/UnitExpenseInterface";
-import { useParams } from "next/navigation";
 import { useCallback, useRef } from "react";
 
 interface SummarOfExpensesProps {

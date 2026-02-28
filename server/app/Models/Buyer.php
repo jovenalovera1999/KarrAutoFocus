@@ -32,4 +32,8 @@ class Buyer extends Model
     public function payment_breakdowns() {
         return $this->hasMany(PaymentBreakdown::class, 'buyer_id', 'buyer_id');
     }
+
+    public function payments() {
+        return $this->hasMany(Payment::class, 'buyer_id', 'buyer_id');
+    }
 }

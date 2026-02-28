@@ -7,15 +7,15 @@ import { CarColumns } from "@/interfaces/CarInterface";
 
 interface ViewCarProps {
   carData: CarColumns | null;
-  isLoadingCarData: boolean;
+  isCarDataLoading: boolean;
 }
 
-export default function ViewCar({ carData, isLoadingCarData }: ViewCarProps) {
+export default function ViewCar({ carData, isCarDataLoading }: ViewCarProps) {
   const { handleDateFormat, handleNumberDecimalFormat } = useFormat();
 
   return (
     <>
-      {!isLoadingCarData && carData?.car_id && (
+      {!isCarDataLoading && carData?.car_id && (
         <>
           <div className="flex flex-col gap-6 mb-4">
             <ComponentCard title="Car Details">

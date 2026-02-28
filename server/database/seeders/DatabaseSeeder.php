@@ -12,6 +12,7 @@ use App\Models\Encumbered;
 use App\Models\EngineCc;
 use App\Models\Make;
 use App\Models\MotherFile;
+use App\Models\PaymentMethod;
 use App\Models\Role;
 use App\Models\TransferStatus;
 use App\Models\Transmission;
@@ -148,6 +149,14 @@ class DatabaseSeeder extends Seeder
             ['transfer_status' => 'Pending Kalibo'],
             ['transfer_status' => 'Pending Antique'],
             ['transfer_status' => 'Pending Caticlan'],
+        ]);
+
+        PaymentMethod::factory()->createMany([
+            ['payment_method' => 'Cash'],
+            ['payment_method' => 'GCash'],
+            ['payment_method' => 'Bank Transfer'],
+            ['payment_method' => 'Check'],
+            ['payment_method' => 'Direct Bank Deposit'],
         ]);
 
         Agent::factory(10)->create();
