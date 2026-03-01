@@ -19,12 +19,14 @@ import useApiInfiniteScrollQuery from "@/hooks/api/useApiInfiniteScrollQuery";
 import OfficeExpenseService from "@/services/OfficeExpenseService";
 
 interface OfficeExpensesTableProps {
-  onAddExpense: () => void;
+  onAddOfficeExpense: () => void;
+  onEditOfficeExpense: (officeExpenseData: OfficeExpenseColumns) => void;
   refreshExpenses: boolean;
 }
 
 export default function OfficeExpensesTable({
-  onAddExpense,
+  onAddOfficeExpense,
+  onEditOfficeExpense,
   refreshExpenses,
 }: OfficeExpensesTableProps) {
   const { handleNumberDecimalFormat, handleDateFormat, handleDateTimeFormat } =
@@ -100,7 +102,7 @@ export default function OfficeExpensesTable({
         <Button
           type="button"
           className="w-full md:w-auto"
-          onClick={onAddExpense}
+          onClick={onAddOfficeExpense}
         >
           Add Expenses
         </Button>
@@ -119,7 +121,7 @@ export default function OfficeExpensesTable({
                   {headers.map((header) => (
                     <TableCell
                       isHeader
-                      className="bg-brand-100 dark:bg-brand-900 sticky top-0 px-5 py-3 font-medium text-brand-500 dark:text-brand-400 text-start text-theme-xs"
+                      className="bg-brand-100 dark:bg-brand-900 sticky top-0 px-5 py-3 font-medium text-brand-500 dark:text-brand-400 text-start text-theme-xs whitespace-nowrap"
                       key={header}
                     >
                       {header}
@@ -146,31 +148,31 @@ export default function OfficeExpensesTable({
                 {officeExpenses.map((officeExpense, index) => (
                   <TableRow
                     className="hover:bg-gray-100 dark:hover:bg-gray-800"
-                    key={officeExpense.expense_id}
+                    key={officeExpense.office_expense_id}
                   >
-                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                       {index + 1}
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                       {handleDateFormat(officeExpense.incurrence_date)}
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                       {handleNumberDecimalFormat(officeExpense.amount)}
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                       {officeExpense.description}
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                       {handleDateTimeFormat(officeExpense.created_at)}
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                       <div className="flex gap-2">
                         <IconButton
                           type="button"
                           size="icon"
                           variant="ghost"
                           className="hover:text-blue-600"
-                          //   onClick={() => onEditUser(user)}
+                          onClick={() => onEditOfficeExpense(officeExpense)}
                         >
                           <PencilIcon />
                         </IconButton>

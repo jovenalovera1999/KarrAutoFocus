@@ -1,5 +1,5 @@
 export interface OfficeExpenseColumns {
-  expense_id: number;
+  office_expense_id: number;
   incurrence_date: string;
   amount: string;
   description: string;

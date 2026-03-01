@@ -35,9 +35,11 @@ Route::controller(CarController::class)->prefix('/car')->group(function() {
     Route::delete('/deleteCar/{car}', 'deleteCar');
 });
 
-Route::controller(OfficeExpenseController::class)->prefix('/expense')->group(function() {
+Route::controller(OfficeExpenseController::class)->prefix('/office_expense')->group(function() {
     Route::get('/loadOfficeExpenses', 'loadOfficeExpenses');
     Route::post('/storeOfficeExpense', 'storeOfficeExpense');
+    Route::put('/updateOfficeExpense/{officeExpense}', 'updateOfficeExpense');
+    Route::delete('/deleteOfficeExpense/{officeExpense}', 'deleteOfficeExpense');
 });
 
 Route::controller(UnitExpenseController::class)->prefix('/unit_expense')->group(function() {

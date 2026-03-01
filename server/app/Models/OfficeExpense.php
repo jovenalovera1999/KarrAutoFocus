@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 
-class OfficeExpenses extends Model
+class OfficeExpense extends Model
 {
     use HasFactory, Notifiable, SoftDeletes;
 
