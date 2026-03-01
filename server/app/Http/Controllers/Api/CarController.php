@@ -358,8 +358,6 @@ class CarController extends Controller
 
     public function getCar(Request $request, Car $car) {
         $page = $request->input('page', 1);
-        $dateFrom = $request->input('date_from');
-        $dateTo = $request->input('date_to');
 
         $car->load([
             'make',
@@ -376,13 +374,6 @@ class CarController extends Controller
         ]);
 
         $unitExpenses = $car->unit_expenses();
-
-        if(!empty($dateFrom) && !empty($dateTo)) {
-            $unitExpenses->where(function ($query) use ($dateFrom, $dateTo) {
-                $query->whereBetween('created_at', [$dateFrom, $dateTo]);
-            });
-        }
-
         $unitExpenses = $unitExpenses->orderBy('created_at', 'desc')
             ->paginate(25, ['*'], 'page', $page);
 
