@@ -9,6 +9,7 @@ import BuyerInformation from "@/features/car/BuyerInformationForm";
 import PaymentBreakdownForm from "@/features/car/PaymentBreakdownForm";
 import PaymentDetails from "@/features/car/PaymentDetails";
 import PaymentsTable from "@/features/car/PaymentsTable";
+import PaymentSummary from "@/features/car/PaymentSummary";
 import SummarOfExpenses from "@/features/car/SummaryOfExpenses";
 import ViewCar from "@/features/car/ViewCar";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -51,6 +52,7 @@ export default function ViewCarPage() {
   const pageRef = useRef(1);
 
   // States for table payments
+  const [totalPaymentAmount, setTotalPaymentAmount] = useState(0);
   const [payments, setPayments] = useState<PaymentColumns[]>([]);
   const [isPaymentsLoading, setIsPaymentsLoading] = useState(false);
 
@@ -144,6 +146,7 @@ export default function ViewCarPage() {
         setLastPage(data.lastPage);
 
         // Payments
+        setTotalPaymentAmount(data.totalPaymentAmount ?? 0);
         setPayments(data.payments);
       } catch (error) {
         console.error(
@@ -213,9 +216,11 @@ export default function ViewCarPage() {
                     Buyer Information
                   </Tab.Trigger>
 
-                  <Tab.Trigger value="payment_details">
-                    Payment Details
-                  </Tab.Trigger>
+                  {carData?.buyer && (
+                    <Tab.Trigger value="payment_details">
+                      Payment Details
+                    </Tab.Trigger>
+                  )}
                 </>
               )}
             </Tab.List>
@@ -246,21 +251,39 @@ export default function ViewCarPage() {
             {carData?.car_status.car_status.toLowerCase() !== "available" && (
               <>
                 <Tab.Content value="buyer_information">
-                  <BuyerInformation carData={carData} />
+                  <BuyerInformation
+                    carData={carData}
+                    refreshCarData={handleRefresh}
+                  />
                 </Tab.Content>
-
-                <Tab.Content value="payment_details">
-                  <div className="flex flex-col gap-4">
-                    <PaymentDetails carData={carData} />
-                    <PaymentBreakdownForm carData={carData} />
-                    <PaymentsTable
-                      carData={carData}
-                      payments={payments}
-                      isPaymentsLoading={isPaymentsLoading}
-                      onAddPayment={handleOpenAddPaymentFormModal}
-                    />
-                  </div>
-                </Tab.Content>
+                {carData?.buyer && (
+                  <Tab.Content value="payment_details">
+                    <div className="flex flex-col gap-4">
+                      <PaymentDetails carData={carData} />
+                      <PaymentBreakdownForm
+                        carData={carData}
+                        refreshCarData={handleRefresh}
+                      />
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="col-span-3 md:col-span-2">
+                          <PaymentsTable
+                            carData={carData}
+                            payments={payments}
+                            isPaymentsLoading={isPaymentsLoading}
+                            onAddPayment={handleOpenAddPaymentFormModal}
+                          />
+                        </div>
+                        <div className="col-span-3 md:col-span-1">
+                          <PaymentSummary
+                            carData={carData}
+                            paymentBreakdownData={carData?.payment_breakdown}
+                            totalPaymentAmount={totalPaymentAmount}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </Tab.Content>
+                )}
               </>
             )}
           </Tab>

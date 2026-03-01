@@ -28,7 +28,7 @@ function Tab({ children, defaultValue }: TabProps) {
   return (
     <TabContext.Provider value={{ activeTab, setActiveTab }}>
       <div className="w-full">
-        <div className="rounded-2xl border border-gray-200 bg-white p-8 dark:border-white/5 dark:bg-white/3">
+        <div className="rounded-2xl border border-gray-200 bg-white p-4 md:p-8 dark:border-white/5 dark:bg-white/3">
           {children}
         </div>
       </div>
@@ -38,8 +38,8 @@ function Tab({ children, defaultValue }: TabProps) {
 
 function TabList({ children }: { children: ReactNode }) {
   return (
-    <div className="border-b border-gray-200 dark:border-white/5">
-      <div className="flex gap-8">{children}</div>
+    <div className="border-b border-gray-200 dark:border-white/5 overflow-scroll">
+      <div className="flex gap-4 md:gap-8">{children}</div>
     </div>
   );
 }

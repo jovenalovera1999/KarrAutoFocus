@@ -14,10 +14,12 @@ import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 
 interface BuyerInformationFormProps {
   carData: CarColumns | null;
+  refreshCarData: () => void;
 }
 
 export default function BuyerInformationForm({
   carData,
+  refreshCarData,
 }: BuyerInformationFormProps) {
   const { showAlert } = useAlert();
   const { handleCommaInNumbersOnTypingFormat } = useFormat();
@@ -56,6 +58,7 @@ export default function BuyerInformationForm({
         });
 
         setFieldErrors({});
+        refreshCarData();
       },
 
       onValidationError: (errors) => {
@@ -84,6 +87,8 @@ export default function BuyerInformationForm({
           title: "Update Success",
           message: data.message,
         });
+
+        refreshCarData();
       },
 
       onValidationError: (errors) => {

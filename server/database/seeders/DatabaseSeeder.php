@@ -159,12 +159,8 @@ class DatabaseSeeder extends Seeder
             ['payment_method' => 'Direct Bank Deposit'],
         ]);
 
-        Agent::factory(10)->create();
-
-        Buyer::factory(50)->create();
-
         Car::factory(100)->create();
 
-        UnitExpense::factory(4500)->create();
+        UnitExpense::factory(500)->create();
     }
 }

@@ -61,7 +61,7 @@ export default function PaymentsTable({
                     {headers.map((header) => (
                       <TableCell
                         isHeader
-                        className="bg-brand-100 dark:bg-brand-900 sticky top-0 px-5 py-3 font-medium text-brand-500 dark:text-brand-400 text-start text-theme-xs"
+                        className="bg-brand-100 dark:bg-brand-900 sticky top-0 px-5 py-3 font-medium text-brand-500 dark:text-brand-400 text-start text-theme-xs whitespace-nowrap"
                         key={header}
                       >
                         {header}
@@ -90,19 +90,19 @@ export default function PaymentsTable({
                       className="hover:bg-gray-100 dark:hover:bg-gray-800"
                       key={payment.payment_id}
                     >
-                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                         {index + 1}
                       </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                         {handleDateFormat(payment.payment_date)}
                       </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                         {handleNumberDecimalFormat(payment.amount)}
                       </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                         {payment.description}
                       </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                         {handleDateTimeFormat(payment.created_at)}
                       </TableCell>
                     </TableRow>

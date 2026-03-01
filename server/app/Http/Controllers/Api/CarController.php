@@ -386,19 +386,23 @@ class CarController extends Controller
         $unitExpenses = $unitExpenses->orderBy('created_at', 'desc')
             ->paginate(25, ['*'], 'page', $page);
 
-        $payments = Payment::query()
-            ->when($car->car_id, fn ($q) =>
-                $q->where('car_id', $car->car_id)
+        $paymentsQuery = Payment::query()
+            ->when($car->car_id, fn ($query) =>
+                $query->where('car_id', $car->car_id)
             )
-            ->when($car->buyer_id, fn ($q) =>
-                $q->where('buyer_id', $car->buyer_id)
+            ->when($car->buyer_id, fn ($query) =>
+                $query->where('buyer_id', $car->buyer_id)
             )
-            ->when($car->payment_breakdown, fn ($q) =>
-                $q->where(
+            ->when($car->payment_breakdown, fn ($query) =>
+                $query->where(
                     'payment_breakdown_id',
                     $car->payment_breakdown->payment_breakdown_id
                 )
-            )
+            );
+
+        $totalPaymentAmount = $paymentsQuery->sum('amount');
+
+        $payments = (clone $paymentsQuery)
             ->with([
                 'car',
                 'buyer',
@@ -416,6 +420,7 @@ class CarController extends Controller
             'currentPage' => $unitExpenses->currentPage(), // Unit expenses
             'lastPage' => $unitExpenses->lastPage(), // Unit expenses
             'payments' => $payments,
+            'totalPaymentAmount' => $totalPaymentAmount,
         ], 200);
     }
 

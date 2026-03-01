@@ -121,7 +121,7 @@ export default function SummarOfExpenses({
         </ComponentCard>
         <ComponentCard title="Summary of Expenses">
           <div className="mb-4 flex flex-col-reverse gap-4 md:flex-row md:items-end md:justify-between">
-            <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex flex-col lg:flex-row gap-4">
               <div className="w-full md:w-72">
                 <Label htmlFor="date_from">From</Label>
                 <Input
@@ -163,7 +163,7 @@ export default function SummarOfExpenses({
                       {headers.map((header) => (
                         <TableCell
                           isHeader
-                          className="bg-brand-100 dark:bg-brand-900 sticky top-0 px-5 py-3 font-medium text-brand-500 dark:text-brand-400 text-start text-theme-xs"
+                          className="bg-brand-100 dark:bg-brand-900 sticky top-0 px-5 py-3 font-medium text-brand-500 dark:text-brand-400 text-start text-theme-xs whitespace-nowrap"
                           key={header}
                         >
                           {header}
@@ -192,16 +192,16 @@ export default function SummarOfExpenses({
                         className="hover:bg-gray-100 dark:hover:bg-gray-800"
                         key={unitExpense.unit_expense_id}
                       >
-                        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                           {index + 1}
                         </TableCell>
-                        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                           {handleNumberDecimalFormat(unitExpense.amount)}
                         </TableCell>
-                        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                           {unitExpense.description}
                         </TableCell>
-                        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                           {handleDateTimeFormat(unitExpense.created_at)}
                         </TableCell>
                       </TableRow>

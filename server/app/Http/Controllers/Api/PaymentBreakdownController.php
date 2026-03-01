@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Finance;
+use App\Models\Payment;
 use App\Models\PaymentBreakdown;
 use App\Models\Term;
 use App\Traits\RestoreOrCreate;
@@ -38,7 +39,7 @@ class PaymentBreakdownController extends Controller
                 $term = $this->restoreOrCreate(Term::class, 'term', $validatedData['term']);
             }
 
-            PaymentBreakdown::create([
+            $paymentBreakdown = PaymentBreakdown::create([
                 'car_id' => $validatedData['car'],
                 'buyer_id' => $validatedData['buyer'],
                 'downpayment' => $validatedData['downpayment'] ?? null,
@@ -48,6 +49,27 @@ class PaymentBreakdownController extends Controller
                 'finance_id' => $finance->finance_id ?? null,
                 'term_id' => $term->term_id ?? null,
             ]);
+
+            $paymentsQuery = Payment::query();
+
+            if (!empty($validatedData['car']) && !empty($validatedData['buyer'])) {
+                $paymentsQuery->where('car_id', $validatedData['car'])
+                            ->where('buyer_id', $validatedData['buyer']);
+            } elseif (!empty($validatedData['car'])) {
+                $paymentsQuery->where('car_id', $validatedData['car']);
+            } elseif (!empty($validatedData['buyer'])) {
+                $paymentsQuery->where('buyer_id', $validatedData['buyer']);
+            }
+
+            $payments = $paymentsQuery->get();
+
+            if ($payments->isNotEmpty()) {
+                $payments->each(function ($payment) use ($paymentBreakdown) {
+                    $payment->update([
+                        'payment_breakdown_id' => $paymentBreakdown->payment_breakdown_id
+                    ]);
+                });
+            }
         });
 
         return response()->json([
@@ -84,6 +106,27 @@ class PaymentBreakdownController extends Controller
                 'finance_id' => $finance->finance_id ?? null,
                 'term_id' => $term->term_id ?? null,
             ]);
+
+            $paymentsQuery = Payment::query();
+
+            if (!empty($validatedData['car']) && !empty($validatedData['buyer'])) {
+                $paymentsQuery->where('car_id', $validatedData['car'])
+                            ->where('buyer_id', $validatedData['buyer']);
+            } elseif (!empty($validatedData['car'])) {
+                $paymentsQuery->where('car_id', $validatedData['car']);
+            } elseif (!empty($validatedData['buyer'])) {
+                $paymentsQuery->where('buyer_id', $validatedData['buyer']);
+            }
+
+            $payments = $paymentsQuery->get();
+
+            if ($payments->isNotEmpty()) {
+                $payments->each(function ($payment) use ($paymentBreakdown) {
+                    $payment->update([
+                        'payment_breakdown_id' => $paymentBreakdown->payment_breakdown_id
+                    ]);
+                });
+            }
         });
 
         return response()->json([

@@ -13,10 +13,12 @@ import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 
 interface PaymentBreakdownFormProps {
   carData: CarColumns | null;
+  refreshCarData: () => void;
 }
 
 export default function PaymentBreakdownForm({
   carData,
+  refreshCarData,
 }: PaymentBreakdownFormProps) {
   const { showAlert } = useAlert();
   const { handleCommaInNumbersOnTypingFormat, handleNumberDecimalFormat } =
@@ -66,6 +68,7 @@ export default function PaymentBreakdownForm({
         });
 
         setFieldErrors({});
+        refreshCarData();
       },
 
       onValidationError: (errors) => {
@@ -101,6 +104,7 @@ export default function PaymentBreakdownForm({
         });
 
         setFieldErrors({});
+        refreshCarData();
       },
 
       onValidationError: (errors) => {
