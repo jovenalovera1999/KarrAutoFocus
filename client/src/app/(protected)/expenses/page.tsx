@@ -2,6 +2,7 @@
 
 import ComponentCard from "@/components/common/ComponentCard";
 import AddOfficeExpenseFormModal from "@/features/office_expense/AddOfficeExpenseFormModal";
+import DeleteOfficeExpenseFormModal from "@/features/office_expense/DeleteOfficeExpenseFormModal";
 import EditOfficeExpenseFormModal from "@/features/office_expense/EditOfficeExpenseFormModal";
 import ExpensesTable from "@/features/office_expense/ExpensesTable";
 import { useRefresh } from "@/hooks/useRefresh";
@@ -17,17 +18,31 @@ export default function ExpensesPage() {
     useState(false);
   const [isEditExpenseFormModalOpen, setIsEditExpenseFormModalOpen] =
     useState(false);
+  const [isDeleteExpenseFormModalOpen, setIsDeleteExpenseFormModalOpen] =
+    useState(false);
 
-  const handleOpenEditExpenseFormModal = (
+  const handleOpenEditOfficeExpenseFormModal = (
     officeExpenseData: OfficeExpenseColumns,
   ) => {
     setOfficeExpenseData(officeExpenseData);
     setIsEditExpenseFormModalOpen(true);
   };
 
-  const handleCloseEditExpenseFormModal = () => {
+  const handleCloseEditOfficeExpenseFormModal = () => {
     setOfficeExpenseData(null);
     setIsEditExpenseFormModalOpen(false);
+  };
+
+  const handleOpenDeleteOfficeExpenseFormModal = (
+    officeExpenseData: OfficeExpenseColumns,
+  ) => {
+    setOfficeExpenseData(officeExpenseData);
+    setIsDeleteExpenseFormModalOpen(true);
+  };
+
+  const handleCloseDeleteOfficeExpenseFormModal = () => {
+    setOfficeExpenseData(null);
+    setIsDeleteExpenseFormModalOpen(false);
   };
 
   return (
@@ -41,14 +56,22 @@ export default function ExpensesPage() {
       <EditOfficeExpenseFormModal
         officeExpenseData={officeExpenseData}
         isOpen={isEditExpenseFormModalOpen}
-        onClose={handleCloseEditExpenseFormModal}
+        onClose={handleCloseEditOfficeExpenseFormModal}
+        refreshOfficeExpenses={handleRefresh}
+      />
+
+      <DeleteOfficeExpenseFormModal
+        officeExpenseData={officeExpenseData}
+        isOpen={isDeleteExpenseFormModalOpen}
+        onClose={handleCloseDeleteOfficeExpenseFormModal}
         refreshOfficeExpenses={handleRefresh}
       />
 
       <ComponentCard title="List of Expenses">
         <ExpensesTable
           onAddOfficeExpense={() => setIsAddExpenseFormModalOpen(true)}
-          onEditOfficeExpense={handleOpenEditExpenseFormModal}
+          onEditOfficeExpense={handleOpenEditOfficeExpenseFormModal}
+          onDeleteOfficeExpense={handleOpenDeleteOfficeExpenseFormModal}
           refreshExpenses={refresh}
         />
       </ComponentCard>

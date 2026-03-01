@@ -21,12 +21,14 @@ import OfficeExpenseService from "@/services/OfficeExpenseService";
 interface OfficeExpensesTableProps {
   onAddOfficeExpense: () => void;
   onEditOfficeExpense: (officeExpenseData: OfficeExpenseColumns) => void;
+  onDeleteOfficeExpense: (officeExpenseData: OfficeExpenseColumns) => void;
   refreshExpenses: boolean;
 }
 
 export default function OfficeExpensesTable({
   onAddOfficeExpense,
   onEditOfficeExpense,
+  onDeleteOfficeExpense,
   refreshExpenses,
 }: OfficeExpensesTableProps) {
   const { handleNumberDecimalFormat, handleDateFormat, handleDateTimeFormat } =
@@ -63,7 +65,7 @@ export default function OfficeExpensesTable({
   useEffect(() => {
     resetExpensesTable();
     loadOfficeExpenses(1);
-  }, [refreshExpenses]);
+  }, [refreshExpenses, debouncedDateFrom, debouncedDateTo]);
 
   const headers = [
     "No.",
@@ -181,7 +183,7 @@ export default function OfficeExpensesTable({
                           size="icon"
                           variant="ghost"
                           className="hover:text-red-600"
-                          //   onClick={() => onDeleteUser(user)}
+                          onClick={() => onDeleteOfficeExpense(officeExpense)}
                         >
                           <TrashBinIcon />
                         </IconButton>

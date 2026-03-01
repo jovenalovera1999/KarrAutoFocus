@@ -20,14 +20,10 @@ interface SummarOfExpensesProps {
   unitExpenses: UnitExpenseColumns[];
   isUnitExpensesLoading: boolean;
   isMoreUnitExpensesLoading: boolean;
-  dateFrom: string;
-  dateTo: string;
-  setDateFrom: (v: string) => void;
-  setDateTo: (v: string) => void;
   onAddUnitExpense: () => void;
   pageRef: React.MutableRefObject<number>;
   lastPage: number | null;
-  handleGetCar: (loadPage: number, dateFrom: string, dateTo: string) => void;
+  handleGetCar: (loadPage: number) => void;
 }
 
 export default function SummarOfExpenses({
@@ -35,10 +31,6 @@ export default function SummarOfExpenses({
   unitExpenses,
   isUnitExpensesLoading,
   isMoreUnitExpensesLoading,
-  dateFrom,
-  dateTo,
-  setDateFrom,
-  setDateTo,
   onAddUnitExpense,
   pageRef,
   lastPage,
@@ -63,7 +55,7 @@ export default function SummarOfExpenses({
     if (scrollTop + clientHeight >= scrollHeight - 50) {
       const nextPage = pageRef.current + 1;
       pageRef.current = nextPage;
-      handleGetCar(nextPage, dateFrom, dateTo);
+      handleGetCar(nextPage);
     }
   }, [
     isUnitExpensesLoading,
@@ -120,27 +112,7 @@ export default function SummarOfExpenses({
           </div>
         </ComponentCard>
         <ComponentCard title="Summary of Expenses">
-          <div className="mb-4 flex flex-col-reverse gap-4 md:flex-row md:items-end md:justify-between">
-            <div className="flex flex-col lg:flex-row gap-4">
-              <div className="w-full md:w-72">
-                <Label htmlFor="date_from">From</Label>
-                <Input
-                  type="date"
-                  name="date_from"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                />
-              </div>
-              <div className="w-full md:w-72">
-                <Label htmlFor="date_to">To</Label>
-                <Input
-                  type="date"
-                  name="date_to"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                />
-              </div>
-            </div>
+          <div className="mb-4 flex gap-4 items-center md:items-end justify-center md:justify-end">
             <Button
               type="button"
               className="w-full md:w-auto"

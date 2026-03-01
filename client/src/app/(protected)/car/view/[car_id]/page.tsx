@@ -43,12 +43,6 @@ export default function ViewCarPage() {
 
   const [lastPage, setLastPage] = useState<number | null>(null);
 
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
-
-  const debouncedDateFrom = useDebounce(dateFrom);
-  const debouncedDateTo = useDebounce(dateTo);
-
   const pageRef = useRef(1);
 
   // States for table payments
@@ -104,7 +98,7 @@ export default function ViewCarPage() {
   // ============================
 
   const handleGetCar = useCallback(
-    async (loadPage: number, dateFromValue: string, dateToValue: string) => {
+    async (loadPage: number) => {
       if (!carId) return;
 
       try {
@@ -122,12 +116,7 @@ export default function ViewCarPage() {
 
         setIsPaymentsLoading(true);
 
-        const { status, data } = await CarService.getCar(
-          carId,
-          loadPage,
-          dateFromValue,
-          dateToValue,
-        );
+        const { status, data } = await CarService.getCar(carId, loadPage);
 
         if (status !== 200) {
           console.error(
@@ -173,8 +162,8 @@ export default function ViewCarPage() {
     setUnitExpenses([]);
     setLastPage(null);
 
-    handleGetCar(1, debouncedDateFrom, debouncedDateTo);
-  }, [carId, refresh, debouncedDateFrom, debouncedDateTo]);
+    handleGetCar(1);
+  }, [carId, refresh]);
 
   return (
     <>
@@ -235,10 +224,6 @@ export default function ViewCarPage() {
                 unitExpenses={unitExpenses}
                 isUnitExpensesLoading={isUnitExpensesLoading}
                 isMoreUnitExpensesLoading={isMoreUnitExpensesLoading}
-                dateFrom={dateFrom}
-                dateTo={dateTo}
-                setDateFrom={setDateFrom}
-                setDateTo={setDateTo}
                 onAddUnitExpense={() =>
                   handleOpenAddUnitExpenseFormModal(carId)
                 }
