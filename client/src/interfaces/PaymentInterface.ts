@@ -1,5 +1,12 @@
+import { BuyerColumns } from "./BuyerInterface";
+import { CarColumns } from "./CarInterface";
+import { PaymentBreakdownColumns } from "./PaymentBreakdownInterface";
+
 export interface PaymentColumns {
   payment_id: number;
+  car: CarColumns;
+  buyer: BuyerColumns;
+  payment_breakdown: PaymentBreakdownColumns;
   payment_date: string;
   amount: string;
   description: string;

@@ -49,7 +49,7 @@ const AppSidebar: React.FC = () => {
 
     {
       name: "Reports",
-      path: "#",
+      path: "/reports",
     },
     {
       name: "Petty Cash",

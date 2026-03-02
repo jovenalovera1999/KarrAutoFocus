@@ -31,15 +31,9 @@ const CarService = {
     const res = await api.get(`${prefix}/loadCarReferences`);
     return res;
   },
-  getCar: async (
-    carId: string | number,
-    page?: number,
-    dateFrom?: string,
-    dateTo?: string,
-  ) => {
+  getCar: async (carId: string | number, page?: number) => {
     const res = await api.get(`${prefix}/getCar/${carId}`, {
       params: { page: page },
-      ...(dateFrom && dateTo ? { date_from: dateFrom, date_to: dateTo } : {}),
     });
     return res;
   },

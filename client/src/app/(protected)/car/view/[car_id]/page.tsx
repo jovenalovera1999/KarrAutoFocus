@@ -12,7 +12,6 @@ import PaymentsTable from "@/features/car/PaymentsTable";
 import PaymentSummary from "@/features/car/PaymentSummary";
 import SummarOfExpenses from "@/features/car/SummaryOfExpenses";
 import ViewCar from "@/features/car/ViewCar";
-import { useDebounce } from "@/hooks/useDebounce";
 import { useRefresh } from "@/hooks/useRefresh";
 import { CarColumns } from "@/interfaces/CarInterface";
 import { PaymentBreakdownColumns } from "@/interfaces/PaymentBreakdownInterface";

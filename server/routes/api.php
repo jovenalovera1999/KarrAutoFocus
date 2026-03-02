@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\OfficeExpenseController;
 use App\Http\Controllers\Api\PaymentBreakdownController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PaymentMethodController;
+use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\UnitExpenseController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
@@ -62,4 +63,8 @@ Route::controller(PaymentMethodController::class)->prefix('/payment_method')->gr
 
 Route::controller(PaymentController::class)->prefix('/payment')->group(function() {
     Route::post('/storePayment', 'storePayment');
+});
+
+Route::controller(ReportController::class)->prefix('/report')->group(function() {
+    Route::get('/loadReports', 'loadReports');
 });

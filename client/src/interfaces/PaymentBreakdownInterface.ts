@@ -1,6 +1,7 @@
 import { BuyerColumns } from "./BuyerInterface";
 import { CarColumns } from "./CarInterface";
 import { FinanceColumns } from "./FinanceInterface";
+import { PaymentColumns } from "./PaymentInterface";
 
 export interface PaymentBreakdownColumns {
   payment_breakdown_id: number;
@@ -12,6 +13,7 @@ export interface PaymentBreakdownColumns {
   transfer: string;
   finance: FinanceColumns;
   term: TermColumns;
+  payments: PaymentColumns[];
   created_at: string;
   updated_at: string;
 }

@@ -6,6 +6,7 @@ import { EngineCcColumns } from "./EngineCcInterface";
 import { MakeColumns } from "./MakeInterface";
 import { MotherFileColumns } from "./MotherFileInterface";
 import { PaymentBreakdownColumns } from "./PaymentBreakdownInterface";
+import { PaymentColumns } from "./PaymentInterface";
 import { TransferStatusColumns } from "./TransferStatusInterface";
 import { TransmissionColumns } from "./TransmissionInterface";
 
@@ -38,6 +39,7 @@ export interface CarColumns {
   address: string;
   buyer?: BuyerColumns;
   payment_breakdown?: PaymentBreakdownColumns;
+  payments: PaymentColumns[];
   created_at: string;
   updated_at: string;
 }
