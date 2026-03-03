@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Car;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
@@ -68,23 +69,18 @@ class ReportController extends Controller
     //     ], 200);
     // }
 
-    public function loadReports()
+    public function loadReports(Request $request)
     {
-        // $reports = Car::with([
-        //     'make',
-        //     'transmission',
-        //     'color',
-        //     'mother_file',
-        //     'engine_cc',
-        //     'car_status',
-        //     'encumbered',
-        //     'transfer_status',
-        //     'buyer.payment_breakdowns.payments.payment_method',
-        //     'buyer.payments.payment_method',
-        // ])
-        // ->get();
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
 
-        $reports = Payment::with([
+        $baseQuery = Payment::query()
+            ->when($dateFrom && $dateTo, function ($query) use ($dateFrom, $dateTo) {
+                $query->whereBetween('payment_date', [$dateFrom, $dateTo]);
+            });
+
+        $reports = (clone $baseQuery)
+            ->with([
             'car.make',
             'car.transmission',
             'car.color',
@@ -95,8 +91,22 @@ class ReportController extends Controller
         ->orderByDesc('payment_date')
         ->get();
 
+        $totalAmountByPaymentMethod = (clone $baseQuery)
+            ->with('payment_method')
+            ->select(
+                'payment_method_id',
+                DB::raw('SUM(amount) as total_amount'),
+            )
+            ->groupBy('payment_method_id')
+            ->get();
+
+        $grandTotal = (clone $baseQuery)
+                ->sum('amount');
+
         return response()->json([
-            'reports' => $reports
+            'reports' => $reports,
+            'totalAmountByPaymentMethod' => $totalAmountByPaymentMethod,
+            'grandTotal' => $grandTotal,
         ], 200);
     }
 }
