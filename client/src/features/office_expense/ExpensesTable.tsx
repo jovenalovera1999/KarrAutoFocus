@@ -80,24 +80,22 @@ export default function OfficeExpensesTable({
     <>
       <div className="mb-4 flex flex-col-reverse gap-4 md:flex-row md:items-end md:justify-between">
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="w-full md:w-72">
+          <div className="w-72">
             <Label htmlFor="date_from">From</Label>
             <Input
               type="date"
               name="date_from"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
-              autoFocus
             />
           </div>
-          <div className="w-full md:w-72">
+          <div className="w-72">
             <Label htmlFor="date_to">To</Label>
             <Input
               type="date"
               name="date_to"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
-              autoFocus
             />
           </div>
         </div>

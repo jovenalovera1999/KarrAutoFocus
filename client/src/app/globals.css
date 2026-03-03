@@ -794,3 +794,32 @@ span.flatpickr-weekday,
     transform: rotate(360deg);
   }
 }
+
+/* Print feature */
+
+@media print {
+  /* Hide everything by default */
+  body * {
+    visibility: hidden;
+  }
+
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-area {
+    padding: 20px;
+  }
+}
