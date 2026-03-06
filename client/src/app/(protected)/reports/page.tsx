@@ -6,9 +6,10 @@ import ReportFooter from "@/features/report/ReportFooter";
 import ReportPreview from "@/features/report/ReportPreview";
 import useApiQuery from "@/hooks/api/useApiQuery";
 import { useFormat } from "@/hooks/useFormat";
+import { PrinterIcon } from "@/icons";
 import { PaymentColumns } from "@/interfaces/PaymentInterface";
 import ReportService from "@/services/ReportService";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 
 export interface TotalAmountByPaymentMethod {
@@ -27,6 +28,7 @@ interface ReportsData {
 
 export default function ReportsPage() {
   const { handleDateTimeFormat } = useFormat();
+  const [currentDateTime, setCurrentDateTime] = useState<Date>(new Date());
   const printRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -39,6 +41,14 @@ export default function ReportsPage() {
 
   useEffect(() => {
     loadReports();
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const reports = reportsData?.reports ?? [];
@@ -65,7 +75,7 @@ export default function ReportsPage() {
                 Dela Cruz, Juan
               </p>
               <p className="text-xs font-medium text-gray-800 dark:text-white/90">
-                {handleDateTimeFormat(new Date().toISOString())}
+                {handleDateTimeFormat(currentDateTime.toISOString())}
               </p>
             </div>
             <ReportFooter

@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { AlertProvider } from "@/context/AlertContext";
+import { AuthProvider } from "@/context/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,11 +30,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} dark:bg-gray-900`}
       >
-        <ThemeProvider>
-          <AlertProvider>
-            <SidebarProvider>{children}</SidebarProvider>
-          </AlertProvider>
-        </ThemeProvider>
+        <AlertProvider>
+          <AuthProvider>
+            <ThemeProvider>
+              <SidebarProvider>{children}</SidebarProvider>
+            </ThemeProvider>
+          </AuthProvider>
+        </AlertProvider>
       </body>
     </html>
   );

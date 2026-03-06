@@ -8,14 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import useApiQuery from "@/hooks/api/useApiQuery";
 import { useFormat } from "@/hooks/useFormat";
 import { CarColumns } from "@/interfaces/CarInterface";
 import { PaymentColumns } from "@/interfaces/PaymentInterface";
-
-interface ReportsData {
-  reports: PaymentColumns[];
-}
+import { useState } from "react";
 
 interface ReportPreviewProps {
   isReportsDataLoading: boolean;
@@ -27,6 +23,9 @@ export default function ReportPreview({
   reportsData,
 }: ReportPreviewProps) {
   const { handleDateFormat, handleNumberDecimalFormat } = useFormat();
+
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
   const headers = [
     "No.",
@@ -43,15 +42,60 @@ export default function ReportPreview({
 
   return (
     <>
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col md:flex-row gap-4 no-print">
         <div className="w-full md:w-72">
           <Label htmlFor="date_from">From</Label>
-          <Input type="date" name="date_from" />
+          <Input
+            type="date"
+            name="date_from"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+          />
         </div>
         <div className="w-full md:w-72">
           <Label htmlFor="date_to">To</Label>
-          <Input type="date" name="date_to" />
+          <Input
+            type="date"
+            name="date_to"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+          />
         </div>
+      </div>
+      <div className="flex flex-col gap-2 mt-0 pt-0">
+        <h1 className="text-theme-xl text-gray-500 dark:text-gray-400">
+          Date Filter:
+        </h1>
+        {(!dateFrom || !dateTo) && (
+          <div>
+            <p className="text-gray-500 dark:text-gray-400 text-theme-sm">
+              Date
+            </p>
+            <p className="text-gray-900 dark:text-white/90 text-theme-xs">
+              {handleDateFormat(new Date().toISOString())}
+            </p>
+          </div>
+        )}
+        {dateFrom && dateTo && (
+          <div className="flex flex-row gap-8">
+            <div>
+              <p className="text-gray-500 dark:text-gray-400 text-theme-sm">
+                From
+              </p>
+              <p className="text-gray-900 dark:text-white/90 text-theme-xs">
+                {handleDateFormat(dateFrom)}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500 dark:text-gray-400 text-theme-sm">
+                To
+              </p>
+              <p className="text-gray-900 dark:text-white/90 text-theme-xs">
+                {handleDateFormat(dateTo)}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
         <div className="w-full overflow-x-auto overflow-y-auto">
