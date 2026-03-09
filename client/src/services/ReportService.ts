@@ -1,6 +1,6 @@
 import api from "@/lib/api";
 
-const prefix = "/report";
+const prefix = "/api/report";
 
 const ReportService = {
   loadReports: async () => {

@@ -1,19 +1,19 @@
 import api from "@/lib/api";
 
-const prefix = "/auth";
+const prefix = "/api/auth";
 
 const AuthService = {
-  me: async () => {
-    const res = await api.get(`${prefix}/me`);
-    return res;
+  csrf: async () => {
+    return await api.get("/sanctum/csrf-cookie");
+  },
+  getUser: async () => {
+    return await api.get("/api/user");
   },
   login: async (username: string, password: string) => {
-    const res = await api.post(`${prefix}/login`, { username, password });
-    return res;
+    return await api.post(`${prefix}/login`, { username, password });
   },
   logout: async () => {
-    const res = await api.post(`${prefix}/logout`);
-    return res;
+    return await api.post(`${prefix}/logout`);
   },
 };
 

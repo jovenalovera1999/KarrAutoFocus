@@ -1,6 +1,6 @@
 import api from "@/lib/api";
 
-const prefix = "/unit_expense";
+const prefix = "/api/unit_expense";
 
 const UnitExpenseService = {
   storeUnitExpense: async (data: any) => {

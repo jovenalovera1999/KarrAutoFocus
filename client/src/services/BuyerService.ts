@@ -1,6 +1,6 @@
 import api from "@/lib/api";
 
-const prefix = "/buyer";
+const prefix = "/api/buyer";
 
 const BuyerService = {
   storeBuyer: async (data: any, carId: string | number) => {

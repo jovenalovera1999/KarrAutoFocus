@@ -21,14 +21,7 @@ export default function LoginForm() {
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
-
-    const success = await login(username, password);
-
-    if (success) {
-      window.location.href = "/car/unit/all";
-    } else {
-      window.location.href = "/";
-    }
+    login(username, password);
   };
 
   return (

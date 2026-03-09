@@ -1,6 +1,6 @@
 import api from "@/lib/api";
 
-const prefix = "/payment_method";
+const prefix = "/api/payment_method";
 
 const PaymentMethodService = {
   loadPaymentMethods: async () => {

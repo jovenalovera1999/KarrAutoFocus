@@ -10,9 +10,9 @@ import React, { useState, useEffect, useRef } from "react";
 import KarrAutoFocusLogo from "@/img/ui/KarrAutoFocusLogo.png";
 
 const AppHeader: React.FC = () => {
-  const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
-
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
+
+  const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
 
   const handleToggle = () => {
     if (window.innerWidth >= 1024) {

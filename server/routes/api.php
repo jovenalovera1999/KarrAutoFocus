@@ -13,18 +13,16 @@ use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// Route::get('/user', function (Request $request) {
-//     return $request->user();
-// })->middleware('auth:sanctum');
+Route::get('/user', function (Request $request) {
+    return $request->user();
+})->middleware('auth:sanctum');
 
 Route::controller(AuthController::class)->prefix('/auth')->group(function() {
     Route::post('/login', 'login')->middleware('throttle:5,1');
 });
 
-Route::middleware(['jwt.cookie', 'auth:api'])->group(function() {
+Route::middleware('auth:sanctum')->group(function() {
     Route::controller(AuthController::class)->prefix('/auth')->group(function() {
-        Route::get('/me', 'me');
-        Route::post('/refresh', 'refresh')->middleware('throttle:10,1');
         Route::post('/logout', 'logout');
     });
 

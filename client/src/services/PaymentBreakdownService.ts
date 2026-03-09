@@ -1,6 +1,6 @@
 import api from "@/lib/api";
 
-const prefix = "/payment_breakdown";
+const prefix = "/api/payment_breakdown";
 
 const PaymentBreakdownService = {
   storePaymentBreakdown: async (data: any) => {

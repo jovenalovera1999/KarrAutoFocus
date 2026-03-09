@@ -11,13 +11,14 @@ import {
 } from "react";
 import { useAlert } from "./AlertContext";
 import { AuthFieldsErrors } from "@/interfaces/AuthInterface";
+import { useRouter } from "next/navigation";
 
 interface AuthContextType {
   user: UserColumns | null;
   loading: boolean;
-  login: (username: string, password: string) => Promise<boolean>;
+  login: (username: string, password: string) => void;
   logout: () => void;
-  refreshUser: () => void;
+  //   refreshUser: () => void;
   fieldErrors: AuthFieldsErrors;
 }
 
@@ -25,60 +26,39 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { showAlert } = useAlert();
+  const router = useRouter();
+
   const [user, setUser] = useState<UserColumns | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<AuthFieldsErrors>({});
-
-  const refreshUser = async () => {
-    try {
-      const { status, data } = await AuthService.me();
-
-      if (status !== 200) {
-        console.error("Status error refreshing user: ", status);
-        setUser(null);
-        return;
-      }
-
-      setUser(data);
-    } catch (error: any) {
-      console.error("Server error refreshing user: ", error);
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    refreshUser();
-  }, []);
 
   const login = async (username: string, password: string) => {
     try {
       setLoading(true);
-      const { status } = await AuthService.login(username, password);
 
-      if (status !== 200) {
-        console.error("Status error logging user in: ", status);
-        return false;
-      }
+      await AuthService.csrf();
 
-      await refreshUser();
-      return true;
+      const { data: loginData } = await AuthService.login(username, password);
+      setUser(loginData.user);
+
+      await AuthService.getUser();
+
+      setFieldErrors({});
+      router.push("/car/unit/all");
     } catch (error: any) {
       if (error.response && error.response.status === 422) {
         setFieldErrors(error.response.data.errors);
-        return false;
+        return;
       } else if (error.response && error.response.status === 401) {
         showAlert({
           variant: "error",
           title: "Invalid Credentials",
           message: error.response.data.message,
         });
-        return false;
+        return;
       }
 
-      console.error("Server error logging user in: ", error);
-      return false;
+      console.error("Server error during login: ", error);
     } finally {
       setLoading(false);
     }
@@ -86,18 +66,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      await AuthService.logout();
-    } catch (error: any) {
-      console.error("Server error logging user out: ", error);
-    }
+      setLoading(true);
 
-    setUser(null);
+      const { data } = await AuthService.logout();
+      setUser(null);
+
+      router.push("/");
+      showAlert({
+        variant: "success",
+        title: "Logged Out",
+        message: data.message,
+      });
+    } catch (error: any) {
+      console.error("Server error during logout: ", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <AuthContext.Provider
-      value={{ user, loading, login, logout, refreshUser, fieldErrors }}
-    >
+    <AuthContext.Provider value={{ user, loading, login, logout, fieldErrors }}>
       {children}
     </AuthContext.Provider>
   );
@@ -105,10 +93,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-
-  if (!context) {
-    throw new Error("useAuth must be used inside AuthProvider");
-  }
-
+  if (!context) throw new Error("useAuth must be used inside AuthProvider");
   return context;
 };

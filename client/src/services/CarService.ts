@@ -1,6 +1,6 @@
 import api from "@/lib/api";
 
-const prefix = "/car";
+const prefix = "/api/car";
 
 const CarService = {
   loadAllUnits: async (page: number, search?: string) => {

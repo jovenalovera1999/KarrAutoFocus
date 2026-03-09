@@ -1,6 +1,6 @@
 import api from "@/lib/api";
 
-const prefix = "/user";
+const prefix = "/api/user";
 
 const UserService = {
   loadUsers: async (page: number, search?: string) => {

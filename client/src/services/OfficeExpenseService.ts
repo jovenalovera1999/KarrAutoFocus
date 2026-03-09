@@ -1,6 +1,6 @@
 import api from "@/lib/api";
 
-const prefix = "/office_expense";
+const prefix = "/api/office_expense";
 
 const OfficeExpenseService = {
   loadOfficeExpenses: async (
