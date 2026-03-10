@@ -3,10 +3,12 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BuyerController;
 use App\Http\Controllers\Api\CarController;
+use App\Http\Controllers\Api\DepositController;
 use App\Http\Controllers\Api\OfficeExpenseController;
 use App\Http\Controllers\Api\PaymentBreakdownController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PaymentMethodController;
+use App\Http\Controllers\Api\PettyCashController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\UnitExpenseController;
 use App\Http\Controllers\Api\UserController;
@@ -14,7 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
-    return $request->user();
+    return $request->user()->load(['branch', 'role']);
 })->middleware('auth:sanctum');
 
 Route::controller(AuthController::class)->prefix('/auth')->group(function() {
@@ -77,6 +79,20 @@ Route::middleware('auth:sanctum')->group(function() {
 
     Route::controller(ReportController::class)->prefix('/report')->group(function() {
         Route::get('/loadReports', 'loadReports');
+    });
+
+    Route::controller(PettyCashController::class)->prefix('/petty_cash')->group(function() {
+        Route::get('/loadPettyCash', 'loadPettyCash');
+        Route::post('/storePettyCash', 'storePettyCash');
+        Route::put('/updatePettyCash/{pettyCash}', 'updatePettyCash');
+        Route::delete('deletePettyCash/{pettyCash}', 'deletePettyCash');
+    });
+
+    Route::controller(DepositController::class)->prefix('/deposit')->group(function() {
+        Route::get('/loadDeposits', 'loadDeposits');
+        Route::post('/storeDeposit', 'storeDeposit');
+        Route::put('/updateDeposit/{deposit}', 'updateDeposit');
+        Route::delete('/deleteDeposit/{deposit}', 'deleteDeposit');
     });
 });
 

@@ -13,6 +13,7 @@ use App\Models\EngineCc;
 use App\Models\Make;
 use App\Models\MotherFile;
 use App\Models\PaymentMethod;
+use App\Models\PettyCash;
 use App\Models\Role;
 use App\Models\TransferStatus;
 use App\Models\Transmission;
@@ -56,6 +57,19 @@ class DatabaseSeeder extends Seeder
         ]);
 
         User::factory(100)->create();
+
+        User::factory()->create([
+            'first_name' => 'John',
+            'middle_name' => 'Baba Yaga',
+            'last_name' => 'Wick',
+            'birth_date' => '1999-10-25',
+            'contact_number' => '09123456789',
+            'email' => 'john.wick@sample.com',
+            'username' => 'admin12',
+            'password' => 'admin12',
+            'role_id' => 1,
+            'branch_id' => 6,
+        ]);
 
         Make::factory()->createMany([
             ['make' => 'Chevrolet'],
@@ -162,5 +176,7 @@ class DatabaseSeeder extends Seeder
         Car::factory(100)->create();
 
         UnitExpense::factory(500)->create();
+
+        PettyCash::factory(100)->create();
     }
 }
