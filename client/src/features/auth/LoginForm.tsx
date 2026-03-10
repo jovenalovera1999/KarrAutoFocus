@@ -8,9 +8,9 @@ import { EyeCloseIcon, EyeIcon } from "@/icons";
 import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
-import KarrAutoFocusImage from "@/img/ui/KarrAutoFocusLogo.png";
 import { useAuth } from "@/context/AuthContext";
 import Spinner from "@/components/ui/spinner/Spinner";
+import CompanyLogo from "@/img/ui/CompanyLogo.png";
 
 export default function LoginForm() {
   const { loading, login, fieldErrors } = useAuth();
@@ -35,7 +35,7 @@ export default function LoginForm() {
                 Karr Auto Focus
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Enter your username and password to login!
+                Enter your username and password to login
               </p>
             </div>
 
@@ -113,7 +113,7 @@ export default function LoginForm() {
         <div className="hidden lg:flex lg:w-1/2 min-h-screen items-center justify-center bg-transparent p-10">
           <Image
             className="object-contain max-w-full h-auto"
-            src={KarrAutoFocusImage}
+            src={CompanyLogo}
             alt="Company Logo"
             priority
           />

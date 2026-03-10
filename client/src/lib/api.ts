@@ -13,6 +13,8 @@ const getCookie = (name: string) => {
   return match ? match[2] : null;
 };
 
+let isRedirecting = false;
+
 api.interceptors.request.use(
   (config) => {
     const xsrfToken = getCookie("XSRF-TOKEN");
@@ -24,7 +26,17 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => Promise.reject(error),
+  (error) => {
+    if (
+      error.response.status === 401 &&
+      typeof window !== "undefined" &&
+      window.location.pathname !== "/"
+    ) {
+      isRedirecting = true;
+      window.location.href = "/";
+    }
+    return Promise.reject(error);
+  },
 );
 
 export default api;

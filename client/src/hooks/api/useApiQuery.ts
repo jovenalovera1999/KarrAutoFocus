@@ -12,13 +12,7 @@ export default function useApiQuery<T>({ apiService }: UseApiQueryOptions<T>) {
     setLoading(true);
 
     try {
-      const { status, data } = await apiService();
-
-      if (status !== 200) {
-        console.error("Status error api query: ", status);
-        return;
-      }
-
+      const { data } = await apiService();
       setData(data);
     } catch (error) {
       console.error("Server error api query: ", error);

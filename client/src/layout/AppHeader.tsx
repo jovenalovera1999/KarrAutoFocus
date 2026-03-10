@@ -1,13 +1,12 @@
 "use client";
 
 import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
-import NotificationDropdown from "@/components/header/NotificationDropdown";
 import UserDropdown from "@/components/header/UserDropdown";
 import { useSidebar } from "@/context/SidebarContext";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
-import KarrAutoFocusLogo from "@/img/ui/KarrAutoFocusLogo.png";
+import CompanyLogo from "@/img/ui/CompanyLogo.png";
 
 const AppHeader: React.FC = () => {
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
@@ -90,14 +89,14 @@ const AppHeader: React.FC = () => {
               width={120}
               height={92}
               className="dark:hidden"
-              src={KarrAutoFocusLogo}
+              src={CompanyLogo}
               alt="Company Logo"
             />
             <Image
               width={120}
               height={92}
               className="hidden dark:block"
-              src={KarrAutoFocusLogo}
+              src={CompanyLogo}
               alt="Company Logo"
             />
           </Link>

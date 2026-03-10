@@ -7,39 +7,37 @@ import Spinner from "@/components/ui/spinner/Spinner";
 import { useAlert } from "@/context/AlertContext";
 import useApiMutation from "@/hooks/api/useApiMutation";
 import { useFormat } from "@/hooks/useFormat";
-import { OfficeExpenseColumns } from "@/interfaces/OfficeExpenseInterface";
-import OfficeExpenseService from "@/services/OfficeExpenseService";
+import { DepositColumns } from "@/interfaces/DepositInterface";
+import DepositService from "@/services/DepositService";
 import { FormEvent, useEffect, useState } from "react";
 
-interface DeleteOfficeExpenseFormModalProps {
-  officeExpenseData: OfficeExpenseColumns | null;
+interface DeleteDepositFormModalProps {
+  depositData: DepositColumns | null;
   isOpen: boolean;
   onClose: () => void;
-  refreshOfficeExpenses: () => void;
+  refreshDeposits: () => void;
 }
 
-export default function DeleteOfficeExpenseFormModal({
-  officeExpenseData,
+export default function DeleteDepositFormModal({
+  depositData,
   isOpen,
   onClose,
-  refreshOfficeExpenses,
-}: DeleteOfficeExpenseFormModalProps) {
+  refreshDeposits,
+}: DeleteDepositFormModalProps) {
   const { showAlert } = useAlert();
-  const { handleDateFormat, handleNumberDecimalFormat } = useFormat();
-  const { execute: executeDeleteOfficeExpense, loading: isDeleting } =
+  const { handleNumberDecimalFormat } = useFormat();
+  const { execute: executeDeleteDeposit, loading: isDeleting } =
     useApiMutation();
 
-  const [officeExpenseId, setOfficeExpenseId] = useState(0);
-  const [incurrenceDate, setIncurrenceDate] = useState("");
+  const [depositId, setDepositId] = useState(0);
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
 
-  const handleDeleteOfficeExpense = (e: FormEvent) => {
+  const handleDeleteDeposit = (e: FormEvent) => {
     e.preventDefault();
 
-    executeDeleteOfficeExpense({
-      apiService: () =>
-        OfficeExpenseService.deleteOfficeExpense(officeExpenseId),
+    executeDeleteDeposit({
+      apiService: () => DepositService.deleteDeposit(depositId),
 
       onSuccess: (data) => {
         showAlert({
@@ -48,7 +46,7 @@ export default function DeleteOfficeExpenseFormModal({
           message: data.message,
         });
 
-        refreshOfficeExpenses();
+        refreshDeposits();
         onClose();
       },
     });
@@ -56,17 +54,15 @@ export default function DeleteOfficeExpenseFormModal({
 
   useEffect(() => {
     if (isOpen) {
-      setOfficeExpenseId(officeExpenseData?.office_expense_id ?? 0);
-      setIncurrenceDate(officeExpenseData?.incurrence_date ?? "");
-      setAmount(officeExpenseData?.amount ?? "");
-      setDescription(officeExpenseData?.description ?? "");
+      setDepositId(depositData?.deposit_id ?? 0);
+      setAmount(depositData?.amount ?? "");
+      setDescription(depositData?.description ?? "");
     }
   }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) {
-      setOfficeExpenseId(0);
-      setIncurrenceDate("");
+      setDepositId(0);
       setAmount("");
       setDescription("");
     }
@@ -75,15 +71,7 @@ export default function DeleteOfficeExpenseFormModal({
   return (
     <>
       <Modal isOpen={isOpen} onClose={onClose}>
-        <Form onSubmit={handleDeleteOfficeExpense}>
-          <div className="mb-7">
-            <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-              Incurrence Date
-            </p>
-            <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-              {handleDateFormat(incurrenceDate)}
-            </p>
-          </div>
+        <Form onSubmit={handleDeleteDeposit}>
           <div className="mb-7">
             <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
               Amount
@@ -110,11 +98,11 @@ export default function DeleteOfficeExpenseFormModal({
                 <>
                   <div className="flex gap-2">
                     <Spinner size="xs" />
-                    Deleting Office Expense...
+                    Deleting Deposit...
                   </div>
                 </>
               ) : (
-                "Delete Office Expense"
+                "Delete Deposit"
               )}
             </Button>
           </div>

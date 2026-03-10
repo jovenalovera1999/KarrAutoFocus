@@ -29,8 +29,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   const [user, setUser] = useState<UserColumns | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [fieldErrors, setFieldErrors] = useState<AuthFieldsErrors>({});
+
+  const fetchUser = async () => {
+    try {
+      const { data } = await AuthService.getUser();
+      setUser(data);
+    } catch (error: any) {
+      setUser(null);
+
+      if (error.response && error.response.status === 401) {
+        router.replace("/");
+      }
+
+      console.error("Error fetching user: ", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
 
   const login = async (username: string, password: string) => {
     try {
@@ -40,8 +61,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const { data: loginData } = await AuthService.login(username, password);
       setUser(loginData.user);
-
-      await AuthService.getUser();
 
       setFieldErrors({});
       router.push("/car/unit/all");

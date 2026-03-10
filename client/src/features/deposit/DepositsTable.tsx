@@ -1,6 +1,10 @@
+"use client";
+
 import Button from "@/components/ui/button/Button";
+import IconButton from "@/components/ui/button/IconButton";
 import Input from "@/components/ui/form/Input";
 import Label from "@/components/ui/form/Label";
+import Spinner from "@/components/ui/spinner/Spinner";
 import {
   Table,
   TableBody,
@@ -8,31 +12,28 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useFormat } from "@/hooks/useFormat";
-import { useEffect, useRef, useState } from "react";
-import { PencilIcon, TrashBinIcon } from "@/icons/index";
-import Spinner from "@/components/ui/spinner/Spinner";
-import { useDebounce } from "@/hooks/useDebounce";
-import IconButton from "@/components/ui/button/IconButton";
-import { OfficeExpenseColumns } from "@/interfaces/OfficeExpenseInterface";
 import useApiInfiniteScrollQuery from "@/hooks/api/useApiInfiniteScrollQuery";
-import OfficeExpenseService from "@/services/OfficeExpenseService";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useFormat } from "@/hooks/useFormat";
+import { PencilIcon, TrashBinIcon } from "@/icons";
+import { DepositColumns } from "@/interfaces/DepositInterface";
+import DepositService from "@/services/DepositService";
+import { useEffect, useRef, useState } from "react";
 
-interface OfficeExpensesTableProps {
-  onAddOfficeExpense: () => void;
-  onEditOfficeExpense: (officeExpenseData: OfficeExpenseColumns) => void;
-  onDeleteOfficeExpense: (officeExpenseData: OfficeExpenseColumns) => void;
-  refreshExpenses: boolean;
+interface DepositsTableProps {
+  onAddDeposit: () => void;
+  onEditDeposit: (depositData: DepositColumns) => void;
+  onDeleteDeposit: (depositData: DepositColumns) => void;
+  refreshDeposits: boolean;
 }
 
-export default function OfficeExpensesTable({
-  onAddOfficeExpense,
-  onEditOfficeExpense,
-  onDeleteOfficeExpense,
-  refreshExpenses,
-}: OfficeExpensesTableProps) {
-  const { handleNumberDecimalFormat, handleDateFormat, handleDateTimeFormat } =
-    useFormat();
+export default function DepositsTable({
+  onAddDeposit,
+  onEditDeposit,
+  onDeleteDeposit,
+  refreshDeposits,
+}: DepositsTableProps) {
+  const { handleDateTimeFormat, handleNumberDecimalFormat } = useFormat();
 
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -43,19 +44,15 @@ export default function OfficeExpensesTable({
   const tableRef = useRef<HTMLDivElement>(null);
 
   const {
-    items: officeExpenses,
-    load: loadOfficeExpenses,
+    items: depositsData,
+    load: loadDeposits,
     handleScroll,
-    isLoading: isOfficeExpensesLoading,
-    isLoadingMore: isMoreOfficeExpensesLoading,
-    reset: resetExpensesTable,
-  } = useApiInfiniteScrollQuery<OfficeExpenseColumns>({
+    isLoading: isDepositsLoading,
+    isLoadingMore: isDepositsLoadingMore,
+    reset: resetDepositsTable,
+  } = useApiInfiniteScrollQuery<DepositColumns>({
     apiService: (page) =>
-      OfficeExpenseService.loadOfficeExpenses(
-        page,
-        debouncedDateFrom,
-        debouncedDateTo,
-      ),
+      DepositService.loadDeposits(page, debouncedDateFrom, debouncedDateTo),
   });
 
   const onScroll = () => {
@@ -63,18 +60,11 @@ export default function OfficeExpensesTable({
   };
 
   useEffect(() => {
-    resetExpensesTable();
-    loadOfficeExpenses(1);
-  }, [refreshExpenses, debouncedDateFrom, debouncedDateTo]);
+    resetDepositsTable();
+    loadDeposits(1);
+  }, [refreshDeposits, debouncedDateFrom, debouncedDateTo]);
 
-  const headers = [
-    "No.",
-    "Incurrence Date",
-    "Amount",
-    "Description",
-    "Date Added",
-    "Actions",
-  ];
+  const headers = ["No.", "Amount", "Description", "Date Created", "Actions"];
 
   return (
     <>
@@ -102,9 +92,10 @@ export default function OfficeExpensesTable({
         <Button
           type="button"
           className="w-full md:w-auto"
-          onClick={onAddOfficeExpense}
+          size="sm"
+          onClick={onAddDeposit}
         >
-          Add Expenses
+          Add Petty Cash
         </Button>
       </div>
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
@@ -132,7 +123,7 @@ export default function OfficeExpensesTable({
 
               {/* Table Body */}
               <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
-                {isOfficeExpensesLoading && officeExpenses.length <= 0 && (
+                {isDepositsLoading && depositsData.length <= 0 && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"
@@ -145,25 +136,22 @@ export default function OfficeExpensesTable({
                   </TableRow>
                 )}
 
-                {officeExpenses.map((officeExpense, index) => (
+                {depositsData.map((depositData, index) => (
                   <TableRow
                     className="hover:bg-gray-100 dark:hover:bg-gray-800"
-                    key={officeExpense.office_expense_id}
+                    key={depositData.deposit_id}
                   >
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                       {index + 1}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
-                      {handleDateFormat(officeExpense.incurrence_date)}
+                      {handleNumberDecimalFormat(depositData.amount)}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
-                      {handleNumberDecimalFormat(officeExpense.amount)}
+                      {depositData.description}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
-                      {officeExpense.description}
-                    </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
-                      {handleDateTimeFormat(officeExpense.created_at)}
+                      {handleDateTimeFormat(depositData.created_at)}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                       <div className="flex gap-2">
@@ -172,7 +160,7 @@ export default function OfficeExpensesTable({
                           size="icon"
                           variant="ghost"
                           className="hover:text-blue-600"
-                          onClick={() => onEditOfficeExpense(officeExpense)}
+                          onClick={() => onEditDeposit(depositData)}
                         >
                           <PencilIcon />
                         </IconButton>
@@ -181,7 +169,7 @@ export default function OfficeExpensesTable({
                           size="icon"
                           variant="ghost"
                           className="hover:text-red-600"
-                          onClick={() => onDeleteOfficeExpense(officeExpense)}
+                          onClick={() => onDeleteDeposit(depositData)}
                         >
                           <TrashBinIcon />
                         </IconButton>
@@ -190,7 +178,7 @@ export default function OfficeExpensesTable({
                   </TableRow>
                 ))}
 
-                {isMoreOfficeExpensesLoading && (
+                {isDepositsLoadingMore && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"
@@ -203,7 +191,7 @@ export default function OfficeExpensesTable({
                   </TableRow>
                 )}
 
-                {!isOfficeExpensesLoading && officeExpenses.length <= 0 && (
+                {!isDepositsLoading && depositsData.length <= 0 && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"

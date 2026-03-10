@@ -21,6 +21,7 @@ export default function useApiInfiniteScrollQuery<T>({
   const [lastPage, setLastPage] = useState<number | null>(null);
 
   const pageRef = useRef(1);
+  const lastScrollTopRef = useRef(0);
 
   const load = useCallback(
     async (page: number) => {
@@ -35,19 +36,16 @@ export default function useApiInfiniteScrollQuery<T>({
       page === 1 ? setIsLoading(true) : setIsLoadingMore(true);
 
       try {
-        const { status, data } = await apiService(page);
-
-        if (status !== 200) {
-          console.error("Status error api infinite scroll query: ", status);
-          return;
-        }
-
+        const { data } = await apiService(page);
         setItems((prev) => (page === 1 ? data.data : [...prev, ...data.data]));
 
-        setLastPage(data.lastPage);
-        pageRef.current = page;
+        if (data.data.length <= 0) {
+          setLastPage(pageRef.current);
+        } else {
+          setLastPage(data.lastPage);
+        }
 
-        console.log(items);
+        pageRef.current = page;
       } catch (error) {
         console.error("Server error api infinite scroll query: ", error);
       } finally {
@@ -70,9 +68,17 @@ export default function useApiInfiniteScrollQuery<T>({
 
       const { scrollTop, scrollHeight, clientHeight } = container;
 
-      if (scrollTop + clientHeight >= scrollHeight - 50) {
-        load(pageRef.current + 1);
+      if (scrollHeight <= clientHeight) return;
+
+      if (scrollTop <= lastScrollTopRef.current) {
+        lastScrollTopRef.current = scrollTop;
+        return;
       }
+
+      lastScrollTopRef.current = scrollTop;
+
+      if (scrollTop + clientHeight >= scrollHeight - 50)
+        load(pageRef.current + 1);
     },
     [isLoading, isLoadingMore, lastPage, load],
   );

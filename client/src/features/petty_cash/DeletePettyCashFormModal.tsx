@@ -7,39 +7,37 @@ import Spinner from "@/components/ui/spinner/Spinner";
 import { useAlert } from "@/context/AlertContext";
 import useApiMutation from "@/hooks/api/useApiMutation";
 import { useFormat } from "@/hooks/useFormat";
-import { OfficeExpenseColumns } from "@/interfaces/OfficeExpenseInterface";
-import OfficeExpenseService from "@/services/OfficeExpenseService";
+import { PettyCashColumns } from "@/interfaces/PettyCashInterface";
+import { PettyCashService } from "@/services/PettyCashService";
 import { FormEvent, useEffect, useState } from "react";
 
-interface DeleteOfficeExpenseFormModalProps {
-  officeExpenseData: OfficeExpenseColumns | null;
+interface DeletePettyCashFormModalProps {
+  pettyCashData: PettyCashColumns | null;
   isOpen: boolean;
   onClose: () => void;
-  refreshOfficeExpenses: () => void;
+  refreshPettyCash: () => void;
 }
 
-export default function DeleteOfficeExpenseFormModal({
-  officeExpenseData,
+export default function DeletePettyCashFormModal({
+  pettyCashData,
   isOpen,
   onClose,
-  refreshOfficeExpenses,
-}: DeleteOfficeExpenseFormModalProps) {
+  refreshPettyCash,
+}: DeletePettyCashFormModalProps) {
   const { showAlert } = useAlert();
-  const { handleDateFormat, handleNumberDecimalFormat } = useFormat();
-  const { execute: executeDeleteOfficeExpense, loading: isDeleting } =
+  const { handleNumberDecimalFormat } = useFormat();
+  const { execute: executeDeletePettyCash, loading: isDeleting } =
     useApiMutation();
 
-  const [officeExpenseId, setOfficeExpenseId] = useState(0);
-  const [incurrenceDate, setIncurrenceDate] = useState("");
+  const [pettyCashId, setPettyCashId] = useState(0);
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
 
-  const handleDeleteOfficeExpense = (e: FormEvent) => {
+  const handleUpdatePettyCash = (e: FormEvent) => {
     e.preventDefault();
 
-    executeDeleteOfficeExpense({
-      apiService: () =>
-        OfficeExpenseService.deleteOfficeExpense(officeExpenseId),
+    executeDeletePettyCash({
+      apiService: () => PettyCashService.deletePettyCash(pettyCashId),
 
       onSuccess: (data) => {
         showAlert({
@@ -48,7 +46,7 @@ export default function DeleteOfficeExpenseFormModal({
           message: data.message,
         });
 
-        refreshOfficeExpenses();
+        refreshPettyCash();
         onClose();
       },
     });
@@ -56,17 +54,15 @@ export default function DeleteOfficeExpenseFormModal({
 
   useEffect(() => {
     if (isOpen) {
-      setOfficeExpenseId(officeExpenseData?.office_expense_id ?? 0);
-      setIncurrenceDate(officeExpenseData?.incurrence_date ?? "");
-      setAmount(officeExpenseData?.amount ?? "");
-      setDescription(officeExpenseData?.description ?? "");
+      setPettyCashId(pettyCashData?.petty_cash_id ?? 0);
+      setAmount(pettyCashData?.amount ?? "");
+      setDescription(pettyCashData?.description ?? "");
     }
   }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) {
-      setOfficeExpenseId(0);
-      setIncurrenceDate("");
+      setPettyCashId(0);
       setAmount("");
       setDescription("");
     }
@@ -75,15 +71,7 @@ export default function DeleteOfficeExpenseFormModal({
   return (
     <>
       <Modal isOpen={isOpen} onClose={onClose}>
-        <Form onSubmit={handleDeleteOfficeExpense}>
-          <div className="mb-7">
-            <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-              Incurrence Date
-            </p>
-            <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-              {handleDateFormat(incurrenceDate)}
-            </p>
-          </div>
+        <Form onSubmit={handleUpdatePettyCash}>
           <div className="mb-7">
             <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
               Amount
@@ -110,11 +98,11 @@ export default function DeleteOfficeExpenseFormModal({
                 <>
                   <div className="flex gap-2">
                     <Spinner size="xs" />
-                    Deleting Office Expense...
+                    Deleting Petty Cash...
                   </div>
                 </>
               ) : (
-                "Delete Office Expense"
+                "Delete Petty Cash"
               )}
             </Button>
           </div>

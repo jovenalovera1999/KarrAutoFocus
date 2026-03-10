@@ -14,7 +14,7 @@ import {
   TableIcon,
   UserCircleIcon,
 } from "../icons/index";
-import KarrAutoFocus from "@/img/ui/KarrAutoFocusLogo.png";
+import CompanyLogo from "@/img/ui/CompanyLogo.png";
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
@@ -28,10 +28,10 @@ const AppSidebar: React.FC = () => {
   };
 
   const navItems: NavItem[] = [
-    {
-      name: "Dashboard",
-      path: "#",
-    },
+    // {
+    //   name: "Dashboard",
+    //   path: "#",
+    // },
     {
       name: "Car",
       subItems: [
@@ -53,24 +53,24 @@ const AppSidebar: React.FC = () => {
     },
     {
       name: "Petty Cash",
-      path: "#",
+      path: "/petty_cash",
     },
     {
       name: "Deposits",
-      path: "#",
+      path: "/deposits",
     },
     {
       name: "Manage Users",
       path: "/manage/users",
     },
-    {
-      name: "References",
-      subItems: [
-        { name: "Makes", path: "#" },
-        { name: "Transmissions", path: "#" },
-        { name: "Car Status", path: "#" },
-      ],
-    },
+    // {
+    //   name: "References",
+    //   subItems: [
+    //     { name: "Makes", path: "#" },
+    //     { name: "Transmissions", path: "#" },
+    //     { name: "Car Status", path: "#" },
+    //   ],
+    // },
   ];
 
   const renderMenuItems = (navItems: NavItem[]) => (
@@ -269,21 +269,21 @@ const AppSidebar: React.FC = () => {
             <>
               <Image
                 className="dark:hidden"
-                src={KarrAutoFocus}
+                src={CompanyLogo}
                 alt="Logo"
                 width={280}
                 height={180}
               />
               <Image
                 className="hidden dark:block"
-                src={KarrAutoFocus}
+                src={CompanyLogo}
                 alt="Logo"
                 width={280}
                 height={180}
               />
             </>
           ) : (
-            <Image src={KarrAutoFocus} alt="Logo" width={32} height={32} />
+            <Image src={CompanyLogo} alt="Logo" width={32} height={32} />
           )}
         </Link>
       </div>

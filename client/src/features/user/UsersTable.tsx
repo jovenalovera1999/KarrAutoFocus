@@ -41,7 +41,7 @@ export default function UsersTable({
   const tableRef = useRef<HTMLDivElement>(null);
 
   const {
-    items: users,
+    items: usersData,
     load: loadUsers,
     handleScroll,
     isLoading: isLoadingUsers,
@@ -116,7 +116,7 @@ export default function UsersTable({
 
               {/* Table Body */}
               <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
-                {isLoadingUsers && users.length <= 0 && (
+                {isLoadingUsers && usersData.length <= 0 && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"
@@ -129,35 +129,35 @@ export default function UsersTable({
                   </TableRow>
                 )}
 
-                {users.map((user, index) => (
+                {usersData.map((userData, index) => (
                   <TableRow
                     className="hover:bg-gray-100 dark:hover:bg-gray-800"
-                    key={user.user_id}
+                    key={userData.user_id}
                   >
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                       {index + 1}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
-                      <p>{handleFullNameFormat(user)}</p>
-                      <p className="text-xs">{user.contact_number}</p>
-                      <p className="text-xs">{user.email}</p>
+                      <p>{handleFullNameFormat(userData)}</p>
+                      <p className="text-xs">{userData.contact_number}</p>
+                      <p className="text-xs">{userData.email}</p>
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                      {handleDateFormat(user.birth_date)}
+                      {handleDateFormat(userData.birth_date)}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                      {user.branch.branch}
+                      {userData.branch.branch}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                       <Badge
                         size="sm"
-                        color={`${user.role.role.toLowerCase() === "admin" ? "error" : user.role.role.toLowerCase() === "manager" ? "success" : "info"}`}
+                        color={`${userData.role.role.toLowerCase() === "admin" ? "error" : userData.role.role.toLowerCase() === "manager" ? "success" : "info"}`}
                       >
-                        {user.role.role}
+                        {userData.role.role}
                       </Badge>
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                      {handleDateTimeFormat(user.created_at)}
+                      {handleDateTimeFormat(userData.created_at)}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                       <div className="flex gap-2">
@@ -166,7 +166,7 @@ export default function UsersTable({
                           size="icon"
                           variant="ghost"
                           className="hover:text-blue-600"
-                          onClick={() => onEditUser(user)}
+                          onClick={() => onEditUser(userData)}
                         >
                           <PencilIcon />
                         </IconButton>
@@ -175,7 +175,7 @@ export default function UsersTable({
                           size="icon"
                           variant="ghost"
                           className="hover:text-red-600"
-                          onClick={() => onDeleteUser(user)}
+                          onClick={() => onDeleteUser(userData)}
                         >
                           <TrashBinIcon />
                         </IconButton>
@@ -197,7 +197,7 @@ export default function UsersTable({
                   </TableRow>
                 )}
 
-                {!isLoadingUsers && users.length <= 0 && (
+                {!isLoadingUsers && usersData.length <= 0 && (
                   <TableRow>
                     <TableCell
                       className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400"

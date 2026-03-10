@@ -17,21 +17,15 @@ export default function useApiMutation() {
     try {
       setLoading(true);
 
-      const { status, data } = await apiService();
-
-      if (status !== 200) {
-        console.error("Status error api mutation: ", status);
-        return;
-      }
-
+      const { data } = await apiService();
       onSuccess?.(data);
     } catch (error: any) {
-      if (error.response && error.response.status !== 422) {
-        console.error("Server error api mutation: ", error);
+      if (error.response && error.response.status === 422) {
+        onValidationError?.(error.response.data.errors);
         return;
       }
 
-      onValidationError?.(error.response.data.errors);
+      console.error("Server error api mutation: ", error);
     } finally {
       setLoading(false);
     }
