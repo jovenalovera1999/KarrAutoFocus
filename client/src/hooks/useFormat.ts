@@ -1,12 +1,13 @@
 import { UserColumns } from "@/interfaces/UserInterface";
-import { ChangeEvent, useState } from "react";
 
 export const useFormat = () => {
-  const handleFullNameFormat = (user: UserColumns) => {
-    const middleInitial = user.middle_name ? `${user.middle_name[0]}.` : "";
-    const suffix = user.suffix_name ? `${user.suffix_name}` : "";
+  const handleFullNameFormat = (user?: UserColumns | null) => {
+    if (!user) return "";
 
-    return `${user.last_name}, ${user.first_name} ${middleInitial} ${suffix}`;
+    const middleInitial = user.middle_name ? `${user.middle_name?.[0]}.` : "";
+    const suffix = user.suffix_name ?? "";
+
+    return `${user.last_name ?? ""}, ${user.first_name ?? ""} ${middleInitial} ${suffix}`.trim();
   };
 
   const handleDateFormat = (date: string): string => {

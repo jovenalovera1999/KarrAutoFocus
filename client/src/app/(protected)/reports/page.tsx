@@ -2,6 +2,7 @@
 
 import ComponentCard from "@/components/common/ComponentCard";
 import Button from "@/components/ui/button/Button";
+import { useAuth } from "@/context/AuthContext";
 import ReportFooter from "@/features/report/ReportFooter";
 import ReportPreview from "@/features/report/ReportPreview";
 import useApiQuery from "@/hooks/api/useApiQuery";
@@ -27,7 +28,8 @@ interface ReportsData {
 }
 
 export default function ReportsPage() {
-  const { handleDateTimeFormat } = useFormat();
+  const { user } = useAuth();
+  const { handleDateTimeFormat, handleFullNameFormat } = useFormat();
   const [currentDateTime, setCurrentDateTime] = useState<Date>(new Date());
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -72,7 +74,7 @@ export default function ReportsPage() {
                 Printed by:
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                Dela Cruz, Juan
+                {handleFullNameFormat(user)}
               </p>
               <p className="text-xs font-medium text-gray-800 dark:text-white/90">
                 {handleDateTimeFormat(currentDateTime.toISOString())}

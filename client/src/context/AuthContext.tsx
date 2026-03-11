@@ -12,6 +12,7 @@ import {
 import { useAlert } from "./AlertContext";
 import { AuthFieldsErrors } from "@/interfaces/AuthInterface";
 import { useRouter } from "next/navigation";
+import { setLoggingOut } from "@/lib/api";
 
 interface AuthContextType {
   user: UserColumns | null;
@@ -86,6 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     try {
       setLoading(true);
+      setLoggingOut(true);
 
       const { data } = await AuthService.logout();
       setUser(null);

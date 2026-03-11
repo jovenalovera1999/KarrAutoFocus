@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useAuth } from "@/context/AuthContext";
 import useApiInfiniteScrollQuery from "@/hooks/api/useApiInfiniteScrollQuery";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useFormat } from "@/hooks/useFormat";
@@ -20,6 +21,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 export default function AvaiableUnitsTable() {
+  const { user } = useAuth();
   const { handleNumberDecimalFormat, handleDateFormat } = useFormat();
 
   const [search, setSearch] = useState("");
@@ -137,18 +139,22 @@ export default function AvaiableUnitsTable() {
                         >
                           <FileIcon />
                         </Link>
-                        <Link
-                          href={`/car/edit/${unit.car_id}`}
-                          className="text-gray-500 dark:text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400"
-                        >
-                          <PencilIcon />
-                        </Link>
-                        <Link
-                          href={`/car/delete/${unit.car_id}`}
-                          className="text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400"
-                        >
-                          <TrashBinIcon />
-                        </Link>
+                        {user?.role.role.toLowerCase() === "admin" && (
+                          <>
+                            <Link
+                              href={`/car/edit/${unit.car_id}`}
+                              className="text-gray-500 dark:text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400"
+                            >
+                              <PencilIcon />
+                            </Link>
+                            <Link
+                              href={`/car/delete/${unit.car_id}`}
+                              className="text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400"
+                            >
+                              <TrashBinIcon />
+                            </Link>
+                          </>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

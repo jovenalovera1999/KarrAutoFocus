@@ -13,28 +13,40 @@ const getCookie = (name: string) => {
   return match ? match[2] : null;
 };
 
-let isRedirecting = false;
-
 api.interceptors.request.use(
   (config) => {
     const xsrfToken = getCookie("XSRF-TOKEN");
-    if (xsrfToken && config.headers) decodeURIComponent(xsrfToken);
+
+    if (xsrfToken && config.headers)
+      config.headers["X-XSRF-TOKEN"] = decodeURIComponent(xsrfToken);
+
     return config;
   },
   (error) => Promise.reject(error),
 );
 
+let isRedirecting = false;
+let isLoggingOut = false;
+
+export const setLoggingOut = (value: boolean) => {
+  isLoggingOut = value;
+};
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (
-      error.response.status === 401 &&
+      error.response?.status === 401 &&
+      !isLoggingOut &&
       typeof window !== "undefined" &&
       window.location.pathname !== "/"
     ) {
-      isRedirecting = true;
-      window.location.href = "/";
+      if (!isRedirecting) {
+        isRedirecting = true;
+        window.location.replace("/");
+      }
     }
+
     return Promise.reject(error);
   },
 );

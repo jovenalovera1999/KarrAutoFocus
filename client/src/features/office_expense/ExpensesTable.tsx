@@ -17,6 +17,7 @@ import IconButton from "@/components/ui/button/IconButton";
 import { OfficeExpenseColumns } from "@/interfaces/OfficeExpenseInterface";
 import useApiInfiniteScrollQuery from "@/hooks/api/useApiInfiniteScrollQuery";
 import OfficeExpenseService from "@/services/OfficeExpenseService";
+import { useAuth } from "@/context/AuthContext";
 
 interface OfficeExpensesTableProps {
   onAddOfficeExpense: () => void;
@@ -31,6 +32,7 @@ export default function OfficeExpensesTable({
   onDeleteOfficeExpense,
   refreshExpenses,
 }: OfficeExpensesTableProps) {
+  const { user } = useAuth();
   const { handleNumberDecimalFormat, handleDateFormat, handleDateTimeFormat } =
     useFormat();
 
@@ -118,15 +120,23 @@ export default function OfficeExpensesTable({
               {/* Table Header */}
               <TableHeader className="border-b border-gray-100 dark:border-white/5">
                 <TableRow>
-                  {headers.map((header) => (
-                    <TableCell
-                      isHeader
-                      className="bg-brand-100 dark:bg-brand-900 sticky top-0 px-5 py-3 font-medium text-brand-500 dark:text-brand-400 text-start text-theme-xs whitespace-nowrap"
-                      key={header}
-                    >
-                      {header}
-                    </TableCell>
-                  ))}
+                  {headers.map((header) => {
+                    if (
+                      user?.role.role.toLowerCase() === "staff" &&
+                      header.toLowerCase() === "actions"
+                    )
+                      return null;
+
+                    return (
+                      <TableCell
+                        isHeader
+                        className="bg-brand-100 dark:bg-brand-900 sticky top-0 px-5 py-3 font-medium text-brand-500 dark:text-brand-400 text-start text-theme-xs whitespace-nowrap"
+                        key={header}
+                      >
+                        {header}
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
               </TableHeader>
 
@@ -165,28 +175,30 @@ export default function OfficeExpensesTable({
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
                       {handleDateTimeFormat(officeExpense.created_at)}
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
-                      <div className="flex gap-2">
-                        <IconButton
-                          type="button"
-                          size="icon"
-                          variant="ghost"
-                          className="hover:text-blue-600"
-                          onClick={() => onEditOfficeExpense(officeExpense)}
-                        >
-                          <PencilIcon />
-                        </IconButton>
-                        <IconButton
-                          type="button"
-                          size="icon"
-                          variant="ghost"
-                          className="hover:text-red-600"
-                          onClick={() => onDeleteOfficeExpense(officeExpense)}
-                        >
-                          <TrashBinIcon />
-                        </IconButton>
-                      </div>
-                    </TableCell>
+                    {user?.role.role.toLowerCase() === "admin" && (
+                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-nowrap">
+                        <div className="flex gap-2">
+                          <IconButton
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                            className="hover:text-blue-600"
+                            onClick={() => onEditOfficeExpense(officeExpense)}
+                          >
+                            <PencilIcon />
+                          </IconButton>
+                          <IconButton
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                            className="hover:text-red-600"
+                            onClick={() => onDeleteOfficeExpense(officeExpense)}
+                          >
+                            <TrashBinIcon />
+                          </IconButton>
+                        </div>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
 
